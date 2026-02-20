@@ -233,20 +233,20 @@ class LoginController extends Controller
                 'token' => $token // For debugging purposes
             ], function ($message) use ($user) {
                 $message->to($user->email);
-                $message->subject('🔐 Password Reset Request - ' . config('app.name'));
+                $message->subject(' Password Reset Request - ' . config('app.name'));
                 $message->from(config('mail.from.address'), config('mail.from.name'));
             });
 
             // Log successful email sending
-            \Log::info("✅ Password reset email sent via Gmail to: {$user->email}");
-            \Log::info("📧 Reset link: {$resetLink}");
+            \Log::info(" Password reset email sent via Gmail to: {$user->email}");
+            \Log::info(" Reset link: {$resetLink}");
 
             return true;
 
         } catch (\Exception $e) {
             // Log the error details
-            \Log::error("❌ Failed to send password reset email to {$user->email}: " . $e->getMessage());
-            \Log::error("📧 Error details: " . $e->getFile() . ':' . $e->getLine());
+            \Log::error(" Failed to send password reset email to {$user->email}: " . $e->getMessage());
+            \Log::error(" Error details: " . $e->getFile() . ':' . $e->getLine());
             
             throw new \Exception('Failed to send email. Please check your email configuration.');
         }
@@ -277,7 +277,7 @@ class LoginController extends Controller
                 $message->from(config('mail.from.address'), config('mail.from.name'));
             });
 
-            \Log::info("✅ Test email sent successfully to: {$user->email}");
+            \Log::info(" Test email sent successfully to: {$user->email}");
 
             return response()->json([
                 'success' => true,
