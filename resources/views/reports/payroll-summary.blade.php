@@ -40,7 +40,7 @@
             text-align: left; 
         }
         .payroll-table th { 
-            background-color: #f0f0f0; 
+            background-color: #1b0707ff; 
             font-weight: bold; 
             text-align: center; 
         }
@@ -51,7 +51,7 @@
         
         .total-row { 
             font-weight: bold; 
-            background-color: #f9f9f9; 
+            background-color: #06031fff; 
         }
         
         .footer { 

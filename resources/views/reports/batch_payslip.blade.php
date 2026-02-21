@@ -12,12 +12,12 @@
         .report-title { font-size: 16px; margin: 8px 0; }
         .batch-info { font-size: 12px; margin-bottom: 10px; }
         table { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 10px; }
-        th, td { border: 1px solid #ddd; padding: 6px; text-align: left; }
-        th { background-color: #f2f2f2; font-weight: bold; }
+        th, td { border: 1px solid #052923ff; padding: 6px; text-align: left; }
+        th { background-color: #180202ff; font-weight: bold; }
         .footer { margin-top: 20px; text-align: right; font-size: 10px; padding-top: 10px; border-top: 1px solid #ddd; }
-        .summary-section { background-color: #f9f9f9; padding: 12px; border-radius: 5px; margin-bottom: 15px; }
+        .summary-section { background-color: #032018ff; padding: 12px; border-radius: 5px; margin-bottom: 15px; }
         .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 10px; }
-        .summary-item { background-color: #e8f4f8; padding: 8px; border-radius: 4px; text-align: center; }
+        .summary-item { background-color: #033546ff; padding: 8px; border-radius: 4px; text-align: center; }
         .summary-value { font-size: 14px; font-weight: bold; }
         .summary-label { font-size: 10px; }
         .amount { text-align: right; }

@@ -9,19 +9,19 @@
         .company-name { font-size: 20px; font-weight: bold; color: #2c3e50; }
         .report-title { font-size: 16px; margin: 8px 0; color: #34495e; }
         .period { font-size: 14px; color: #7f8c8d; margin-bottom: 5px; }
-        .summary-box { background: #d4edda; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #28a745; }
+        .summary-box { background: #010a03ff; padding: 15px; margin: 15px 0; border-radius: 5px; border-left: 4px solid #28a745; }
         .summary-item { display: inline-block; margin-right: 30px; }
         .summary-label { font-weight: bold; color: #155724; }
         .summary-value { color: #155724; font-weight: bold; }
         table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 10px; }
         th { background-color: #28a745; color: white; padding: 8px; text-align: left; border: 1px solid #ddd; }
-        td { padding: 8px; border: 1px solid #ddd; }
+        td { padding: 8px; border: 1px solid #140707ff; }
         .text-right { text-align: right; }
         .text-center { text-align: center; }
         .footer { margin-top: 30px; text-align: center; color: #7f8c8d; font-size: 10px; border-top: 1px solid #ddd; padding-top: 10px; }
-        .totals-row { background-color: #d4edda; font-weight: bold; }
+        .totals-row { background-color: #77e7e2ff; font-weight: bold; }
         .currency { font-family: 'DejaVu Sans', monospace; }
-        .tier-badge { background: #6c757d; color: white; padding: 2px 6px; border-radius: 3px; font-size: 9px; }
+        .tier-badge { background: #11a39cff; color: white; padding: 2px 6px; border-radius: 3px; font-size: 9px; }
     </style>
 </head>
 <body>
