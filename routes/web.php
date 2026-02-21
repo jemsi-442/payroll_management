@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
-| Public Routes (No Authentication Required)
+| Public Routes (No Authentications Required)
 |--------------------------------------------------------------------------
 | These routes handle authentication and password management for all users.
 */

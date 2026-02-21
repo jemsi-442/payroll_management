@@ -40,7 +40,7 @@
             text-align: left; 
         }
         .summary-table th { 
-            background-color: #f0f0f0; 
+            background-color: #2a6608ff; 
             font-weight: bold; 
             text-align: center; 
         }
@@ -51,11 +51,11 @@
         
         .total-row { 
             font-weight: bold; 
-            background-color: #f9f9f9; 
+            background-color: #186e26ff; 
         }
         
         .section-header {
-            background-color: #e0e0e0;
+            background-color: #1e9e58ff;
             font-weight: bold;
             text-align: center;
         }
@@ -71,7 +71,7 @@
         .summary-info {
             margin: 10px 0;
             padding: 8px;
-            background-color: #f5f5f5;
+            background-color: #1c7c34ff;
             border-radius: 4px;
             font-size: 8px;
         }
