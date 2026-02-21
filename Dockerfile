@@ -1,47 +1,30 @@
-# Dockerfile for Laravel 12 on PHP 8.4 with GD, Composer, and .env setup
-
-# Step 1: Base image
 FROM php:8.4-fpm
 
-# Step 2: Set working directory
-WORKDIR /var/www/html
-
-# Step 3: Install system dependencies
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
-    git \
-    unzip \
     libzip-dev \
     libpng-dev \
-    libjpeg-dev \
-    libfreetype6-dev \
     libonig-dev \
-    libxml2-dev \
     zip \
+    unzip \
+    git \
     curl \
-    && docker-php-ext-install pdo_mysql mbstring zip exif pcntl bcmath gd
+    && docker-php-ext-install pdo_mysql zip gd
 
-# Step 4: Install Composer
+# Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Step 5: Copy project files
+WORKDIR /var/www/html
+
+# Copy project
 COPY . .
 
-# Step 6: Copy .env.example to .env
-RUN cp .env.example .env
+# Install dependencies
+RUN composer install --optimize-autoloader --no-dev --ignore-platform-req=ext-gd
 
-# Step 7: Install PHP dependencies
-RUN composer install --ignore-platform-req=ext-gd --optimize-autoloader --no-dev
+# Give permissions
+RUN chown -R www-data:www-data storage bootstrap/cache
 
-# Step 8: Generate Laravel application key
-RUN php artisan key:generate
-
-# Step 9: Cache config/routes/views for better performance
-RUN php artisan config:cache
-RUN php artisan route:cache
-RUN php artisan view:cache
-
-# Step 10: Expose port
 EXPOSE 8000
 
-# Step 11: Start Laravel server
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+CMD php artisan serve --host=0.0.0.0 --port=8000
