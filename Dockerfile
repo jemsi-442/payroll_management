@@ -1,5 +1,4 @@
-# Dockerfile
-FROM php:8.2-fpm
+FROM php:8.4-fpm
 
 WORKDIR /var/www/html
 
@@ -8,14 +7,18 @@ RUN apt-get update && apt-get install -y \
     unzip \
     libzip-dev \
     libonig-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
     mariadb-client \
-    && docker-php-ext-install pdo pdo_mysql mbstring zip
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo pdo_mysql mbstring zip gd
 
 COPY . .
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-RUN composer install --optimize-autoloader --no-dev
+RUN composer install --ignore-platform-req=ext-gd --optimize-autoloader --no-dev
 
 RUN php artisan key:generate
 
