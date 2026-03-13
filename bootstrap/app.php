@@ -3,6 +3,7 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Request;
 use App\Http\Middleware\PreventBrowserHistory;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -12,8 +13,13 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Railway / reverse proxy: tumaini headers kama X-Forwarded-Proto ili app itambue HTTPS.
+        $middleware->trustProxies(at: '*', headers: Request::HEADER_X_FORWARDED_ALL);
+
         // Global middleware
-        $middleware->web(append: [
+        $middleware->web(prepend: [
+            \App\Http\Middleware\ForceHttps::class,
+        ], append: [
             \App\Http\Middleware\CheckSessionTimeout::class,
             PreventBrowserHistory::class,
         ]);

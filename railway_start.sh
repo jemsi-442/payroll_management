@@ -29,7 +29,7 @@ run_migrations_with_retry() {
 should_run_migrations=false
 if is_truthy "${SKIP_MIGRATIONS:-}"; then
     should_run_migrations=false
-elif is_truthy "${RUN_MIGRATIONS:-}" || [ -n "${DATABASE_URL:-}" ] || [ -n "${MYSQL_URL:-}" ]; then
+elif is_truthy "${RUN_MIGRATIONS:-}" || [ -n "${DATABASE_URL:-}" ] || [ -n "${MYSQL_URL:-}" ] || [ -n "${MYSQL_PUBLIC_URL:-}" ]; then
     should_run_migrations=true
 fi
 
@@ -39,9 +39,17 @@ if [ "$should_run_migrations" = "true" ]; then
 fi
 
 if is_truthy "${RUN_SEED:-}"; then
-    echo "RUN_SEED enabled: running seeders..." >&2
-    if ! php artisan db:seed --force; then
-        echo "Seeders failed (possibly already seeded). Continuing..." >&2
+    echo "RUN_SEED enabled: running InitialSetupSeeder..." >&2
+    if ! php artisan db:seed --class=InitialSetupSeeder --force; then
+        echo "InitialSetupSeeder failed. Continuing..." >&2
+    fi
+fi
+
+# Hatari: DatabaseSeeder inatruncate tables (sample data). Tumia kwenye DB mpya tu.
+if is_truthy "${RUN_SAMPLE_DATA:-}"; then
+    echo "RUN_SAMPLE_DATA enabled: running DatabaseSeeder (DESTRUCTIVE)..." >&2
+    if ! php artisan db:seed --class=DatabaseSeeder --force; then
+        echo "DatabaseSeeder failed. Continuing..." >&2
     fi
 fi
 

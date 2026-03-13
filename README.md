@@ -83,15 +83,18 @@ A modern, responsive **HR & Payroll Dashboard** built with **Laravel Blade**, **
    - `APP_ENV=production`
    - `APP_DEBUG=false`
    - `APP_KEY=...` (generate with `php artisan key:generate --show`)
-   - `APP_URL=...` (your Railway domain)
+   - `APP_URL=...` (your Railway domain, use `https://...`)
+   - `FORCE_HTTPS=true` (recommended on Railway)
    - Database (choose one):
      - Set `DATABASE_URL` (recommended) or `DB_URL`
      - Or set `DB_CONNECTION` + `DB_HOST` + `DB_PORT` + `DB_DATABASE` + `DB_USERNAME` + `DB_PASSWORD`
    - `LOG_CHANNEL=stderr`
+   - Tip: Prefer Railway private DB URL (`MYSQL_URL`) to avoid egress fees (don't use `MYSQL_PUBLIC_URL` unless you must).
 
 3. **Run migrations / seed**
    - If you have a shell/console: run `php artisan migrate --force` (and optionally `php artisan db:seed --force`)
    - If you don't see a console in Railway UI, set these variables temporarily:
      - `RUN_MIGRATIONS=true`
-     - `RUN_SEED=true` (optional; creates default accounts like `admin@payroll.com` / `password`)
+     - `RUN_SEED=true` (safe; runs `InitialSetupSeeder` to create default accounts like `admin@payroll.com` / `password`)
+     - `RUN_SAMPLE_DATA=true` (DANGEROUS; runs `DatabaseSeeder` and truncates tables — use only on a fresh DB)
      - Redeploy once, then remove them.
