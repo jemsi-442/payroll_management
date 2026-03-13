@@ -130,8 +130,8 @@ class LoginController extends Controller
             // Generate reset token
             $token = Str::random(60);
 
-            // Store token in password_resets table
-            DB::table('password_resets')->updateOrInsert(
+            // Store token in password_reset_tokens table
+            DB::table('password_reset_tokens')->updateOrInsert(
                 ['email' => $request->email],
                 [
                     'token' => Hash::make($token),
@@ -171,7 +171,7 @@ class LoginController extends Controller
 
         try {
             // Verify token
-            $resetRecord = DB::table('password_resets')
+            $resetRecord = DB::table('password_reset_tokens')
                 ->where('email', $request->email)
                 ->first();
 
@@ -181,7 +181,7 @@ class LoginController extends Controller
 
             // Check if token is valid (within 60 minutes)
             if (Carbon::parse($resetRecord->created_at)->addMinutes(60)->isPast()) {
-                DB::table('password_resets')->where('email', $request->email)->delete();
+                DB::table('password_reset_tokens')->where('email', $request->email)->delete();
                 return back()->withErrors(['email' => 'Reset token has expired.']);
             }
 
@@ -204,7 +204,7 @@ class LoginController extends Controller
             $user->updatePasswordChangedAt();
 
             // Delete used token
-            DB::table('password_resets')->where('email', $request->email)->delete();
+            DB::table('password_reset_tokens')->where('email', $request->email)->delete();
 
             // Log the user in automatically after password reset
             Auth::login($user);
@@ -226,11 +226,10 @@ class LoginController extends Controller
             $resetLink = route('password.reset', ['token' => $token, 'email' => $user->email]);
 
             // Send email using Laravel Mail with Gmail SMTP
-            Mail::send('emails.password-reset', [
+            Mail::send('email.password-reset', [
                 'user' => $user,
                 'resetLink' => $resetLink,
                 'expiryTime' => now()->addMinutes(60)->format('F j, Y, g:i A'),
-                'token' => $token // For debugging purposes
             ], function ($message) use ($user) {
                 $message->to($user->email);
                 $message->subject(' Password Reset Request - ' . config('app.name'));
@@ -238,15 +237,15 @@ class LoginController extends Controller
             });
 
             // Log successful email sending
-            \Log::info(" Password reset email sent via Gmail to: {$user->email}");
-            \Log::info(" Reset link: {$resetLink}");
+            \Log::info("Password reset email sent to: {$user->email}");
+            \Log::info("Password reset link: {$resetLink}");
 
             return true;
 
         } catch (\Exception $e) {
             // Log the error details
-            \Log::error(" Failed to send password reset email to {$user->email}: " . $e->getMessage());
-            \Log::error(" Error details: " . $e->getFile() . ':' . $e->getLine());
+            \Log::error("Failed to send password reset email to {$user->email}: " . $e->getMessage());
+            \Log::error("Error details: " . $e->getFile() . ':' . $e->getLine());
             
             throw new \Exception('Failed to send email. Please check your email configuration.');
         }
