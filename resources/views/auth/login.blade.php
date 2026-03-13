@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>{{ config('app.name') }} - Login</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -17,9 +17,9 @@
                     },
                     colors: {
                         primary: {
-                            light: '#10a37f',
-                            DEFAULT: '#1a7f64',
-                            dark: '#156352',
+                            light: '#22D3EE',
+                            DEFAULT: '#1E3A8A',
+                            dark: '#162f6b',
                         },
                         secondary: {
                             DEFAULT: '#1F2937',
@@ -44,7 +44,7 @@
     </script>
     <style>
         .premium-gradient {
-            background: linear-gradient(135deg, #10a37f 0%, #1a7f64 100%);
+            background: linear-gradient(135deg, #1E3A8A 0%, #162f6b 100%);
         }
         .loading-bar {
             position: fixed;
@@ -52,7 +52,7 @@
             left: 0;
             width: 100%;
             height: 4px;
-            background: #10a37f;
+            background: #22D3EE;
             transform: scaleX(0);
             transform-origin: left;
             animation: loading 5s ease-in-out forwards;
@@ -109,7 +109,7 @@
                 <div class="flex justify-center items-center mb-4">
                     <img src="{{ asset('assets/logo.png') }}" alt="Logo" class="h-16">
                 </div>
-                <p class="text-green-600 font-semibold mt-1 text-2xl">Welcome <span class="font-semibold text-gray-800">Back</span></p>
+                <p class="text-primary font-semibold mt-1 text-2xl">Welcome <span class="font-semibold text-gray-800">Back</span></p>
             </div>
 
             <!-- Form Content -->

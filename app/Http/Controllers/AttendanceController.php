@@ -118,7 +118,7 @@ public function cleanupOldRecords()
      */
     public function store(Request $request)
     {
-        $this->authorizeRole(['admin', 'hr manager']);
+        $this->authorizeRole(['admin', 'hr', 'hr manager']);
 
         $validator = Validator::make($request->all(), [
             'employee_id' => 'required|exists:employees,id',
@@ -155,7 +155,7 @@ public function cleanupOldRecords()
      */
     public function edit($id)
     {
-        $this->authorizeRole(['admin', 'hr manager']);
+        $this->authorizeRole(['admin', 'hr', 'hr manager']);
         $attendance = Attendance::findOrFail($id);
         return response()->json($attendance);
     }
@@ -165,7 +165,7 @@ public function cleanupOldRecords()
      */
     public function update(Request $request, $id)
     {
-        $this->authorizeRole(['admin', 'hr manager']);
+        $this->authorizeRole(['admin', 'hr', 'hr manager']);
         $attendance = Attendance::findOrFail($id);
 
         $validator = Validator::make($request->all(), [
@@ -259,7 +259,7 @@ public function requestLeave(Request $request)
      */
     public function reviewLeaveRequest($id)
     {
-        $this->authorizeRole(['admin', 'hr manager']);
+        $this->authorizeRole(['admin', 'hr', 'hr manager']);
         $leaveRequest = LeaveRequest::with('employee')->findOrFail($id);
         return response()->json([
             'employee_name' => $leaveRequest->employee_name,
@@ -275,7 +275,7 @@ public function requestLeave(Request $request)
      */
 public function updateLeaveRequest(Request $request, $id)
 {
-    $this->authorizeRole(['admin', 'hr manager']);
+    $this->authorizeRole(['admin', 'hr', 'hr manager']);
     $leaveRequest = LeaveRequest::findOrFail($id);
 
     $validator = Validator::make($request->all(), [
@@ -301,7 +301,7 @@ public function updateLeaveRequest(Request $request, $id)
      */
     public function export(Request $request)
     {
-        $this->authorizeRole(['admin', 'hr manager']);
+        $this->authorizeRole(['admin', 'hr', 'hr manager']);
 
         $validator = Validator::make($request->all(), [
             'format' => 'required|in:csv,xlsx',
@@ -324,7 +324,7 @@ public function updateLeaveRequest(Request $request, $id)
      */
     public function syncBiometric()
     {
-        $this->authorizeRole(['admin', 'hr manager']);
+        $this->authorizeRole(['admin', 'hr', 'hr manager']);
 
         try {
             $zk = new ZKTeco(config('zkteco.ip'), config('zkteco.port'));

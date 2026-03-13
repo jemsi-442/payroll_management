@@ -61,7 +61,6 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:admin,hr'])->post('/dashboard/quick-actions', [DashboardController::class, 'quickActions'])->name('dashboard.quick-actions');
     // Dashboard routes
     Route::get('/dashboard/refresh-data', [DashboardController::class, 'refreshDashboardData'])->name('dashboard.refresh-data');
-    Route::post('/dashboard/quick-actions', [DashboardController::class, 'quickActions'])->name('dashboard.quick-actions');
 
     /*
     |--------------------------------------------------------------------------

@@ -24,6 +24,27 @@ class EmployeePortalController extends Controller
     // Employee allowed report types - payslip only
     private const EMPLOYEE_ALLOWED_REPORTS = ['payslip'];
 
+    private function normalizedRole($user): string
+    {
+        $raw = strtolower(trim((string) ($user?->role ?? 'employee')));
+
+        $roleAliases = [
+            'administrator' => 'admin',
+            'hr manager' => 'hr',
+            'human resources' => 'hr',
+            'human resource' => 'hr',
+        ];
+
+        return $roleAliases[$raw] ?? $raw;
+    }
+
+    private function hasAnyRole($user, array $roles): bool
+    {
+        $userRole = $this->normalizedRole($user);
+        $allowed = array_map(fn ($role) => strtolower(trim((string) $role)), $roles);
+        return in_array($userRole, $allowed, true);
+    }
+
     public function __construct()
     {
         $this->middleware('auth');
@@ -36,8 +57,8 @@ class EmployeePortalController extends Controller
     {
         $user = Auth::user();
 
-        // Check if user has valid role (admin, hr manager, employee, manager)
-        if (!in_array(strtolower($user->role), ['admin', 'hr manager', 'employee', 'manager'])) {
+        // Check if user has valid role (admin, hr, employee, manager)
+        if (!$this->hasAnyRole($user, ['admin', 'hr', 'employee', 'manager'])) {
             return redirect()->back()->with('error', 'Access denied. You do not have permission to access the employee portal.');
         }
 
@@ -49,7 +70,7 @@ class EmployeePortalController extends Controller
         $leaveRequests = $employee->leaveRequests()->latest()->paginate(10);
 
         // Get reports - different logic based on role
-        if (in_array(strtolower($user->role), ['admin', 'hr manager'])) {
+        if ($this->hasAnyRole($user, ['admin', 'hr'])) {
             // Admin/HR can see all reports (both individual and batch)
             $reports = Report::with('employee')
                 ->where('status', 'completed')
@@ -76,8 +97,8 @@ class EmployeePortalController extends Controller
         $banks = Bank::all();
 
         // Determine user role for view logic
-        $isAdminOrHR = in_array(strtolower($user->role), ['admin', 'hr manager']);
-        $isEmployee = strtolower($user->role) === 'employee';
+        $isAdminOrHR = $this->hasAnyRole($user, ['admin', 'hr']);
+        $isEmployee = $this->normalizedRole($user) === 'employee';
 
         return view('dashboard.employeeportal', compact(
             'employee', 
@@ -121,7 +142,7 @@ class EmployeePortalController extends Controller
         $user = Auth::user();
 
         // Check if user has valid role
-        if (!in_array(strtolower($user->role), ['admin', 'hr manager', 'employee', 'manager'])) {
+        if (!$this->hasAnyRole($user, ['admin', 'hr', 'employee', 'manager'])) {
             return redirect()->back()->with('error', 'Access denied.');
         }
 
@@ -174,7 +195,7 @@ class EmployeePortalController extends Controller
         $user = Auth::user();
 
         // Check if user has valid role
-        if (!in_array(strtolower($user->role), ['admin', 'hr manager', 'employee', 'manager'])) {
+        if (!$this->hasAnyRole($user, ['admin', 'hr', 'employee', 'manager'])) {
             return redirect()->back()->with('error', 'Access denied.');
         }
 
@@ -208,7 +229,7 @@ class EmployeePortalController extends Controller
         $user = Auth::user();
 
         // Check if user has valid role
-        if (!in_array(strtolower($user->role), ['admin', 'hr manager', 'employee', 'manager'])) {
+        if (!$this->hasAnyRole($user, ['admin', 'hr', 'employee', 'manager'])) {
             return redirect()->back()->with('error', 'Access denied.');
         }
 
@@ -269,12 +290,12 @@ class EmployeePortalController extends Controller
         $user = Auth::user();
         
         // Check if user has valid role
-        if (!in_array(strtolower($user->role), ['admin', 'hr manager', 'employee', 'manager'])) {
+        if (!$this->hasAnyRole($user, ['admin', 'hr', 'employee', 'manager'])) {
             return redirect()->back()->with('error', 'Access denied.');
         }
 
         $currentUser = $user; // Rename current user to avoid conflict
-        $isAdminOrHR = in_array(strtolower($user->role), ['admin', 'hr manager']);
+        $isAdminOrHR = $this->hasAnyRole($user, ['admin', 'hr']);
 
         // Get payslip with access control
         if ($isAdminOrHR) {
@@ -366,12 +387,12 @@ class EmployeePortalController extends Controller
         $user = Auth::user();
 
         // Check if user has valid role
-        if (!in_array(strtolower($user->role), ['admin', 'hr manager', 'employee', 'manager'])) {
+        if (!$this->hasAnyRole($user, ['admin', 'hr', 'employee', 'manager'])) {
             return redirect()->back()->with('error', 'Access denied.');
         }
 
         $employee = $user;
-        $isAdminOrHR = in_array(strtolower($user->role), ['admin', 'hr manager']);
+        $isAdminOrHR = $this->hasAnyRole($user, ['admin', 'hr']);
 
         // Get report from database
         $report = Report::with('employee')->where('status', 'completed')->findOrFail($id);
@@ -406,7 +427,7 @@ class EmployeePortalController extends Controller
         $user = Auth::user();
         $employee = $user;
 
-        if (in_array(strtolower($user->role), ['admin', 'hr manager'])) {
+        if ($this->hasAnyRole($user, ['admin', 'hr'])) {
             $reports = Report::with('employee')
                 ->where('status', 'completed')
                 ->latest()

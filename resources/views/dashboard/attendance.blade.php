@@ -20,6 +20,12 @@
 @endsection
 
 @section('content')
+    @php
+        $userRole = strtolower(trim((string) (Auth::user()->role ?? 'employee')));
+        $isAdminOrHR = in_array($userRole, ['admin', 'hr', 'hr manager'], true);
+        $isEmployee = $userRole === 'employee';
+    @endphp
+
     <!-- Success/Error Message -->
     @if(session('success'))
         <div class="bg-green-50 border-l-4 border-green-400 text-green-700 p-4 rounded-lg mb-6 shadow-sm" role="alert">
@@ -32,29 +38,29 @@
         </div>
     @endif
 
-    <div class="mb-6">
-        <div class="flex space-x-4 border-b border-gray-200" role="tablist">
-            <button id="currentWeekTab" class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-t-md focus:outline-none focus:ring-2 focus:ring-green-300 transition-all duration-200" role="tab" aria-selected="true" aria-controls="currentWeekContainer">
-                Recently Week
-                <span class="ml-2 text-xs bg-green-500 text-white px-2 py-0.5 rounded-full">{{ $weekInfo['start'] }} - {{ $weekInfo['end'] }}</span>
-            </button>
-            @if(strtolower(Auth::user()->role) === 'admin' || strtolower(Auth::user()->role) === 'hr')
-                <button id="logAttendanceTab" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-t-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-green-300 transition-all duration-200" role="tab" aria-selected="false" aria-controls="logAttendanceFormContainer">
-                    Log Attendance
-                </button>
-            @endif
-            <button id="leaveRequestsTab" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-t-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-green-300 transition-all duration-200 relative" role="tab" aria-selected="false" aria-controls="leaveRequestsContainer">
-                Leave Requests
-                @php
-                    $badgeCount = 0;
-                    if (strtolower(Auth::user()->role) === 'admin' || strtolower(Auth::user()->role) === 'hr') {
-                        $badgeCount = isset($pendingLeaveCount) ? $pendingLeaveCount : 0;
-                    } else {
-                        $badgeCount = $leaveRequests->getCollection()->filter(function($leaveRequest) {
-                            return $leaveRequest->employee_id == Auth::user()->id && $leaveRequest->status == 'Pending';
-                        })->count();
-                    }
-                @endphp
+	    <div class="mb-6">
+	        <div class="flex flex-wrap gap-2 border-b border-gray-200" role="tablist">
+	            <button id="currentWeekTab" class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-t-md focus:outline-none focus:ring-2 focus:ring-green-300 transition-all duration-200" role="tab" aria-selected="true" aria-controls="currentWeekContainer">
+	                Recently Week
+	                <span class="ml-2 text-xs bg-green-500 text-white px-2 py-0.5 rounded-full">{{ $weekInfo['start'] }} - {{ $weekInfo['end'] }}</span>
+	            </button>
+	            @if($isAdminOrHR)
+	                <button id="logAttendanceTab" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-t-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-green-300 transition-all duration-200" role="tab" aria-selected="false" aria-controls="logAttendanceFormContainer">
+	                    Log Attendance
+	                </button>
+	            @endif
+	            <button id="leaveRequestsTab" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-t-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-green-300 transition-all duration-200 relative" role="tab" aria-selected="false" aria-controls="leaveRequestsContainer">
+	                Leave Requests
+	                @php
+	                    $badgeCount = 0;
+	                    if ($isAdminOrHR) {
+	                        $badgeCount = isset($pendingLeaveCount) ? $pendingLeaveCount : 0;
+	                    } else {
+	                        $badgeCount = $leaveRequests->getCollection()->filter(function($leaveRequest) {
+	                            return $leaveRequest->employee_id == Auth::user()->id && $leaveRequest->status == 'Pending';
+	                        })->count();
+	                    }
+	                @endphp
                 @if($badgeCount > 0)
                     <span class="absolute -top-2 -right-2 inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-500 text-white">
                         {{ $badgeCount }}
@@ -84,14 +90,14 @@
                         {{ $weekInfo['current'] }}
                     </span>
                 </div>
-                @if(strtolower(Auth::user()->role) === 'admin' || strtolower(Auth::user()->role) === 'hr')
-                <div class="bg-orange-50 p-4 rounded-lg">
-                    <span class="block text-sm text-gray-600">Records This Week</span>
-                    <span class="text-2xl font-semibold text-orange-600">
-                        {{ $currentWeekAttendances->total() }}
-                    </span>
-                </div>
-                @endif
+	                @if($isAdminOrHR)
+	                <div class="bg-orange-50 p-4 rounded-lg">
+	                    <span class="block text-sm text-gray-600">Records This Week</span>
+	                    <span class="text-2xl font-semibold text-orange-600">
+	                        {{ $currentWeekAttendances->total() }}
+	                    </span>
+	                </div>
+	                @endif
             </div>
         </div>
 
@@ -105,29 +111,29 @@
             <input id="searchAttendance" type="text" placeholder="Search by employee or date..." class="pl-10 w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-white shadow-sm text-gray-900 placeholder-gray-500" aria-label="Search attendance by employee or date">
         </div>
 
-        <!-- Attendance Table Header -->
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-medium text-gray-700 flex items-center">
-                <i class="fas fa-clock text-green-500 mr-2"></i> Attendance Records (This Week)
-                <span class="ml-2 text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                    @if(strtolower(Auth::user()->role) === 'employee')
-                        @php
-                            $employeeAttendanceCount = $currentWeekAttendances->getCollection()->filter(function($attendance) {
-                                return $attendance->employee_id == Auth::user()->id;
-                            })->count();
-                        @endphp
-                        {{ $employeeAttendanceCount }} records
-                    @else
+	        <!-- Attendance Table Header -->
+	        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+	            <h3 class="text-lg font-medium text-gray-700 flex items-center">
+	                <i class="fas fa-clock text-green-500 mr-2"></i> Attendance Records (This Week)
+	                <span class="ml-2 text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+	                    @if($isEmployee)
+	                        @php
+	                            $employeeAttendanceCount = $currentWeekAttendances->getCollection()->filter(function($attendance) {
+	                                return $attendance->employee_id == Auth::user()->id;
+	                            })->count();
+	                        @endphp
+	                        {{ $employeeAttendanceCount }} records
+	                    @else
                         {{ $currentWeekAttendances->total() }} records
                     @endif
                 </span>
             </h3>
-            <div class="flex space-x-2">
-                @if(strtolower(Auth::user()->role) === 'admin' || strtolower(Auth::user()->role) === 'hr')
-                    <button class="text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 focus:ring-4 focus:ring-green-100 font-medium rounded-lg text-sm px-4 py-2 text-center transition-all duration-200 flex items-center shadow-sm hover:shadow-md" onclick="openExportModal()">
-                        <i class="fas fa-file-export mr-2"></i> Export
-                    </button>
-                @endif
+	            <div class="flex flex-wrap gap-2">
+	                @if($isAdminOrHR)
+	                    <button class="text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 focus:ring-4 focus:ring-green-100 font-medium rounded-lg text-sm px-4 py-2 text-center transition-all duration-200 flex items-center shadow-sm hover:shadow-md" onclick="openExportModal()">
+	                        <i class="fas fa-file-export mr-2"></i> Export
+	                    </button>
+	                @endif
                 <button class="text-green-700 bg-green-50 hover:bg-green-100 border border-green-200 focus:ring-4 focus:ring-green-100 font-medium rounded-lg text-sm px-4 py-2 text-center transition-all duration-200 flex items-center shadow-sm hover:shadow-md" onclick="openModal('requestLeaveModal')">
                     <i class="fas fa-calendar-plus mr-2"></i> Request Leave
                 </button>
@@ -146,14 +152,14 @@
                             <th class="py-3.5 px-6 text-left font-semibold">Check Out</th>
                             <th class="py-3.5 px-6 text-left font-semibold">Hours Worked</th>
                             <th class="py-3.5 px-6 text-left font-semibold">Status</th>
-                            @if(strtolower(Auth::user()->role) === 'admin' || strtolower(Auth::user()->role) === 'hr')
-                                <th class="py-3.5 px-6 text-left font-semibold">Actions</th>
-                            @endif
+	                            @if($isAdminOrHR)
+	                                <th class="py-3.5 px-6 text-left font-semibold">Actions</th>
+	                            @endif
                         </tr>
                     </thead>
                     <tbody id="attendanceTable" class="divide-y divide-gray-100">
                         @foreach($currentWeekAttendances as $attendance)
-                            @if(strtolower(Auth::user()->role) === 'admin' || strtolower(Auth::user()->role) === 'hr' || (strtolower(Auth::user()->role) === 'employee' && Auth::user()->id === $attendance->employee_id))
+	                            @if($isAdminOrHR || ($isEmployee && Auth::user()->id === $attendance->employee_id))
                                 <tr id="attendance-{{ $attendance->id }}" class="bg-white hover:bg-gray-50 transition-all duration-200 attendance-row group" data-employee="{{ strtolower($attendance->employee_name) }}" data-date="{{ $attendance->date?->format('Y-m-d') ?? '' }}">
                                     <td class="py-4 px-6">
                                         <div class="flex items-center">
@@ -171,7 +177,7 @@
                                     <td class="py-4 px-6 text-sm text-gray-700">{{ $attendance->check_out ?? '-' }}</td>
                                     <td class="py-4 px-6 text-sm text-gray-700">{{ number_format($attendance->hours_worked, 2) }}</td>
                                     <td class="py-4 px-6 text-sm text-gray-700">{{ $attendance->status }}</td>
-                                    @if(strtolower(Auth::user()->role) === 'admin' || strtolower(Auth::user()->role) === 'hr')
+	                                    @if($isAdminOrHR)
                                         <td class="py-4 px-6">
                                             <div class="flex items-center space-x-2">
                                                 <button onclick="editAttendance({{ $attendance->id }})" class="text-green-600 hover:text-green-800 p-1.5 rounded-md hover:bg-green-50 transition-all duration-200" title="Edit" aria-label="Edit attendance for {{ $attendance->employee_name }}">
@@ -191,18 +197,18 @@
             </div>
 
             <!-- Empty State -->
-            @if($currentWeekAttendances->count() == 0)
-                <div class="text-center py-12">
+	            @if($currentWeekAttendances->count() == 0)
+	                <div class="text-center py-12">
                     <div class="mx-auto w-24 h-24 mb-4 rounded-full bg-gray-100 flex items-center justify-center">
                         <i class="fas fa-clock text-gray-400 text-2xl"></i>
                     </div>
                     <h3 class="text-lg font-medium text-gray-900 mb-1">No attendance records found for this week</h3>
                     <p class="text-gray-500 mb-6">Get started by logging your first attendance record.</p>
-                    @if(strtolower(Auth::user()->role) === 'admin' || strtolower(Auth::user()->role) === 'hr')
-                        <button class="text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-4 py-2 text-center transition-all duration-200 inline-flex items-center shadow-sm hover:shadow-md" onclick="toggleTab('logAttendanceTab')">
-                            <i class="fas fa-plus mr-2"></i> Log Attendance
-                        </button>
-                    @else
+	                    @if($isAdminOrHR)
+	                        <button class="text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-4 py-2 text-center transition-all duration-200 inline-flex items-center shadow-sm hover:shadow-md" onclick="toggleTab('logAttendanceTab')">
+	                            <i class="fas fa-plus mr-2"></i> Log Attendance
+	                        </button>
+	                    @else
                         <button class="text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-4 py-2 text-center transition-all duration-200 inline-flex items-center shadow-sm hover:shadow-md" onclick="openModal('requestLeaveModal')">
                             <i class="fas fa-calendar-plus mr-2"></i> Request Leave
                         </button>
@@ -215,7 +221,7 @@
         @if($currentWeekAttendances->hasPages())
             <div class="mt-6 flex items-center justify-between border-t border-gray-200 pt-5">
                 <div class="text-sm text-gray-700">
-                    @if(strtolower(Auth::user()->role) === 'employee')
+	                    @if($isEmployee)
                         @php
                             $employeeAttendances = $currentWeekAttendances->getCollection()->filter(function($attendance) {
                                 return $attendance->employee_id == Auth::user()->id;
@@ -247,8 +253,8 @@
         @endif
     </div>
 
-    <!-- Log Attendance Form Container (only for Admin/hr) -->
-    @if(strtolower(Auth::user()->role) === 'admin' || strtolower(Auth::user()->role) === 'hr')
+	    <!-- Log Attendance Form Container (only for Admin/hr) -->
+	    @if($isAdminOrHR)
         <div id="logAttendanceFormContainer" class="hidden">
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 sm:p-8">
                 <h3 class="text-xl font-semibold text-green-600 flex items-center mb-6">
@@ -335,12 +341,12 @@
             <input id="searchLeaveRequests" type="text" placeholder="Search by employee or leave type..." class="pl-10 w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all duration-200 bg-white shadow-sm text-gray-900 placeholder-gray-500" aria-label="Search leave requests by employee or leave type">
         </div>
 
-        <!-- Leave Requests Table Header -->
-        <div class="flex justify-between items-center mb-4">
-            <h3 class="text-lg font-medium text-gray-700 flex items-center">
+	        <!-- Leave Requests Table Header -->
+	        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4">
+	            <h3 class="text-lg font-medium text-gray-700 flex items-center">
                 <i class="fas fa-calendar-alt text-green-500 mr-2"></i> Leave Requests
                 <span class="ml-2 text-sm text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                    @if(strtolower(Auth::user()->role) === 'employee')
+	                    @if($isEmployee)
                         @php
                             $employeeLeaveRequestCount = $leaveRequests->getCollection()->filter(function($leaveRequest) {
                                 return $leaveRequest->employee_id == Auth::user()->id;
@@ -366,14 +372,14 @@
                             <th class="py-3.5 px-6 text-left font-semibold">End Date</th>
                             <th class="py-3.5 px-6 text-left font-semibold">Reason</th>
                             <th class="py-3.5 px-6 text-left font-semibold">Status</th>
-                            @if(strtolower(Auth::user()->role) === 'admin' || strtolower(Auth::user()->role) === 'hr')
-                                <th class="py-3.5 px-6 text-left font-semibold">Actions</th>
-                            @endif
+	                            @if($isAdminOrHR)
+	                                <th class="py-3.5 px-6 text-left font-semibold">Actions</th>
+	                            @endif
                         </tr>
                     </thead>
                     <tbody id="leaveRequestsTable" class="divide-y divide-gray-100">
                         @foreach($leaveRequests as $leaveRequest)
-                            @if(strtolower(Auth::user()->role) === 'admin' || strtolower(Auth::user()->role) === 'hr' || (strtolower(Auth::user()->role) === 'employee' && Auth::user()->id === $leaveRequest->employee_id))
+	                            @if($isAdminOrHR || ($isEmployee && Auth::user()->id === $leaveRequest->employee_id))
                         <tr id="leave-request-{{ $leaveRequest->id }}" class="bg-white hover:bg-gray-50 transition-all duration-200 leave-request-row group" data-employee="{{ strtolower($leaveRequest->employee_name) }}" data-leave-type="{{ strtolower($leaveRequest->leave_type) }}">
                             <td class="py-4 px-6">
                                 <div class="flex items-center">
@@ -381,11 +387,11 @@
                                         <span class="font-medium text-green-800">{{ substr($leaveRequest->employee_name, 0, 1) }}</span>
                                     </div>
                                     <div>
-                                        @if(strtolower(Auth::user()->role) === 'admin' || strtolower(Auth::user()->role) === 'hr')
-                                            <button onclick="reviewLeaveRequest({{ $leaveRequest->id }})" class="font-medium text-gray-900 hover:text-green-600 transition-colors">
-                                                {{ $leaveRequest->employee_name }}
-                                            </button>
-                                        @else
+	                                        @if($isAdminOrHR)
+	                                            <button onclick="reviewLeaveRequest({{ $leaveRequest->id }})" class="font-medium text-gray-900 hover:text-green-600 transition-colors">
+	                                                {{ $leaveRequest->employee_name }}
+	                                            </button>
+	                                        @else
                                             <div class="font-medium text-gray-900">{{ $leaveRequest->employee_name }}</div>
                                         @endif
                                         <div class="text-sm text-gray-500">{{ $leaveRequest->employee_email }}</div>
@@ -402,7 +408,7 @@
                                     {{ $leaveRequest->status }}
                                 </span>
                             </td>
-                            @if(strtolower(Auth::user()->role) === 'admin' || strtolower(Auth::user()->role) === 'hr')
+	                            @if($isAdminOrHR)
                                 <td class="py-4 px-6">
                                     <div class="flex items-center space-x-2">
                                         <button onclick="reviewLeaveRequest({{ $leaveRequest->id }})" class="text-green-600 hover:text-green-800 p-1.5 rounded-md hover:bg-green-50 transition-all duration-200" title="Review" aria-label="Review leave request for {{ $leaveRequest->employee_name }}">
@@ -437,7 +443,7 @@
         @if($leaveRequests->hasPages())
             <div class="mt-6 flex items-center justify-between border-t border-gray-200 pt-5">
                 <div class="text-sm text-gray-700">
-                    @if(strtolower(Auth::user()->role) === 'employee')
+	                    @if($isEmployee)
                         @php
                             $employeeLeaveRequests = $leaveRequests->getCollection()->filter(function($leaveRequest) {
                                 return $leaveRequest->employee_id == Auth::user()->id;
@@ -469,8 +475,8 @@
         @endif
     </div>
 
-    <!-- Export Modal (Admin/hr only) -->
-    @if(strtolower(Auth::user()->role) === 'admin' || strtolower(Auth::user()->role) === 'hr')
+	    <!-- Export Modal (Admin/hr only) -->
+	    @if($isAdminOrHR)
         <div id="exportModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
             <div class="bg-white rounded-lg w-full max-w-md transform transition-all duration-300 scale-95 modal-content">
                 <div class="p-6 bg-green-50 border-b border-green-200">
@@ -537,7 +543,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-gray-600 text-sm font-medium mb-2" for="leave_employee_id">Employee</label>
-                        @if(strtolower(Auth::user()->role) === 'employee')
+	                        @if($isEmployee)
                             <input type="hidden" name="employee_id" value="{{ Auth::user()->id }}">
                             <input type="text" id="leave_employee_id" value="{{ Auth::user()->name }}" class="bg-gray-50 border border-gray-200 rounded-lg block w-full py-2.5 px-3 leading-6 transition-all duration-200" readonly aria-label="Employee name (auto-filled)">
                         @else
@@ -575,10 +581,10 @@
                         <label class="block text-gray-600 text-sm font-medium mb-2" for="reason">Reason</label>
                         <textarea name="reason" id="reason" required class="bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 block w-full py-2.5 px-3 leading-6 transition-all duration-200" placeholder="Provide reason for leave" rows="4" aria-label="Provide reason for leave request"></textarea>
                     </div>
-                    @if(strtolower(Auth::user()->role) === 'admin' || strtolower(Auth::user()->role) === 'hr')
-                        <div class="col-span-2">
-                            <label class="block text-gray-600 text-sm font-medium mb-2" for="status">Status</label>
-                            <select name="status" id="status" class="bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 block w-full py-2.5 px-3 leading-6 transition-all duration-200" aria-label="Select leave request status">
+	                    @if($isAdminOrHR)
+	                        <div class="col-span-2">
+	                            <label class="block text-gray-600 text-sm font-medium mb-2" for="status">Status</label>
+	                            <select name="status" id="status" class="bg-gray-50 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 block w-full py-2.5 px-3 leading-6 transition-all duration-200" aria-label="Select leave request status">
                                 <option value="Pending" selected>Pending</option>
                                 <option value="Approved">Approved</option>
                                 <option value="Rejected">Rejected</option>
@@ -600,8 +606,8 @@
         </div>
     </div>
 
-    <!-- Review Leave Request Modal (Admin/hr only) -->
-    @if(strtolower(Auth::user()->role) === 'admin' || strtolower(Auth::user()->role) === 'hr')
+	    <!-- Review Leave Request Modal (Admin/hr only) -->
+	    @if($isAdminOrHR)
         <div id="reviewLeaveRequestModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
             <div class="bg-white rounded-lg w-full max-w-2xl transform transition-all duration-300 scale-95 modal-content">
                 <div class="p-6 bg-green-50 border-b border-green-200">
@@ -662,8 +668,8 @@
         </div>
     @endif
 
-    <!-- Edit Attendance Modal -->
-    @if(strtolower(Auth::user()->role) === 'admin' || strtolower(Auth::user()->role) === 'hr')
+	    <!-- Edit Attendance Modal -->
+	    @if($isAdminOrHR)
         <div id="editAttendanceModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 hidden z-50">
             <div class="bg-white rounded-lg w-full max-w-2xl transform transition-all duration-300 scale-95 modal-content">
                 <div class="p-6 bg-green-50 border-b border-green-200">
@@ -770,9 +776,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Tab navigation
     document.getElementById('currentWeekTab').addEventListener('click', () => toggleTab('currentWeekTab'));
-    @if(strtolower(Auth::user()->role) === 'admin' || strtolower(Auth::user()->role) === 'hr')
-        document.getElementById('logAttendanceTab').addEventListener('click', () => toggleTab('logAttendanceTab'));
-    @endif
+	    @if($isAdminOrHR)
+	        document.getElementById('logAttendanceTab').addEventListener('click', () => toggleTab('logAttendanceTab'));
+	    @endif
     document.getElementById('leaveRequestsTab').addEventListener('click', () => toggleTab('leaveRequestsTab'));
 
     // Debounce function for search
@@ -815,10 +821,10 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // Reset forms on tab switch or cancel
-    @if(strtolower(Auth::user()->role) === 'admin' || strtolower(Auth::user()->role) === 'hr')
-        document.getElementById('logAttendanceTab').addEventListener('click', () => {
-            const form = document.getElementById('logAttendanceForm');
-            form.reset();
+	    @if($isAdminOrHR)
+	        document.getElementById('logAttendanceTab').addEventListener('click', () => {
+	            const form = document.getElementById('logAttendanceForm');
+	            form.reset();
             document.querySelectorAll('#logAttendanceForm .flatpickr').forEach(input => {
                 if (input._flatpickr) input._flatpickr.clear();
             });

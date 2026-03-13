@@ -26,8 +26,8 @@ class AdminHRMiddleware
         // Pata jukumu la mtumiaji kwa kutumia sifa ya 'role'.
         $userRole = strtolower(trim($user->role ?? ''));
 
-        // Ruhusu Admin na HR tu
-        if (in_array($userRole, ['admin', 'hr'])) {
+        // Ruhusu Admin na HR tu (support legacy "hr manager")
+        if (in_array($userRole, ['admin', 'hr', 'hr manager'], true)) {
             Log::info('AdminHRMiddleware - Access granted');
             return $next($request);
         }

@@ -25,7 +25,7 @@
 </head>
 <body>
     <div class="header">
-        <div class="company-name">{{ $settings->company_name ?? 'COMPANY NAME' }}</div>
+        <div class="company-name">{{ $settings->company_name ?? config('app.name') }}</div>
         <div class="report-title">PAYE TAX REPORT</div>
         <div class="period">Period: {{ $period_display }}</div>
         <div>Generated on: {{ $generated_at->format('M d, Y H:i') }} by {{ $generated_by }}</div>

@@ -28,7 +28,7 @@ class SettingController extends Controller
             return redirect('/login')->with('error', 'Please log in.');
         }
 
-        if (!in_array(strtolower($user->role), ['admin', 'hr manager'])) {
+        if (!in_array(strtolower($user->role), ['admin', 'hr', 'hr manager'])) {
             Log::warning('Unauthorized access attempt', ['user_id' => $user->id, 'role' => $user->role]);
             return redirect()->back()->with('error', 'Unauthorized access.');
         }
@@ -113,7 +113,7 @@ class SettingController extends Controller
 
     public function updatePayroll(Request $request)
     {
-        $this->authorizeRole(['admin', 'hr manager']);
+        $this->authorizeRole(['admin', 'hr', 'hr manager']);
 
         $validator = Validator::make($request->all(), [
             'payroll_frequency' => 'required|in:monthly,biweekly,weekly',
@@ -178,7 +178,7 @@ class SettingController extends Controller
 
     public function storeAllowance(Request $request)
     {
-        $this->authorizeRole(['admin', 'hr manager']);
+        $this->authorizeRole(['admin', 'hr', 'hr manager']);
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255|unique:allowance,name',
@@ -210,7 +210,7 @@ class SettingController extends Controller
 
     public function updateAllowance(Request $request, $id)
     {
-        $this->authorizeRole(['admin', 'hr manager']);
+        $this->authorizeRole(['admin', 'hr', 'hr manager']);
 
         $allowance = Allowance::findOrFail($id);
 
@@ -245,7 +245,7 @@ class SettingController extends Controller
 
     public function destroyAllowance($id)
     {
-        $this->authorizeRole(['admin', 'hr manager']);
+        $this->authorizeRole(['admin', 'hr', 'hr manager']);
 
         try {
             $allowance = Allowance::findOrFail($id);
@@ -269,7 +269,7 @@ class SettingController extends Controller
 
     public function storeDeduction(Request $request)
     {
-        $this->authorizeRole(['admin', 'hr manager']);
+        $this->authorizeRole(['admin', 'hr', 'hr manager']);
 
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255|unique:deductions,name',
@@ -301,7 +301,7 @@ class SettingController extends Controller
 
     public function updateDeduction(Request $request, $id)
     {
-        $this->authorizeRole(['admin', 'hr manager']);
+        $this->authorizeRole(['admin', 'hr', 'hr manager']);
 
         $deduction = Deduction::findOrFail($id);
 
@@ -336,7 +336,7 @@ class SettingController extends Controller
 
     public function destroyDeduction($id)
     {
-        $this->authorizeRole(['admin', 'hr manager']);
+        $this->authorizeRole(['admin', 'hr', 'hr manager']);
 
         try {
             $deduction = Deduction::findOrFail($id);
@@ -360,7 +360,7 @@ class SettingController extends Controller
 
     public function toggleAllowance($id)
     {
-        $this->authorizeRole(['admin', 'hr manager']);
+        $this->authorizeRole(['admin', 'hr', 'hr manager']);
 
         try {
             $allowance = Allowance::findOrFail($id);
@@ -380,7 +380,7 @@ class SettingController extends Controller
 
     public function toggleDeduction($id)
     {
-        $this->authorizeRole(['admin', 'hr manager']);
+        $this->authorizeRole(['admin', 'hr', 'hr manager']);
 
         try {
             $deduction = Deduction::findOrFail($id);

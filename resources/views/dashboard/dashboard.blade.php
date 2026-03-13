@@ -73,9 +73,13 @@
         </div>
     </div>
 
-    @php $user = Auth::user(); @endphp
+    @php
+        $user = Auth::user();
+        $userRole = strtolower(trim((string) ($user?->role ?? '')));
+        $isAdminOrHR = $user && in_array($userRole, ['admin', 'hr', 'hr manager'], true);
+    @endphp
 
-    @if($user && in_array(strtolower($user->role), ['admin','hr']))
+    @if($isAdminOrHR)
         <div class="mb-8">
             <h3 class="text-lg font-medium text-gray-700 mb-4 flex items-center">
                 <i class="fas fa-bolt text-yellow-500 mr-2"></i> Quick Actions

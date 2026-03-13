@@ -1,4 +1,4 @@
-<div class="grid grid-cols-2 gap-4">
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
     <p><strong>Employee ID:</strong> {{ $employee->employee_id }}</p>
     <p><strong>Name:</strong> {{ $employee->name }}</p>
     <p><strong>Email:</strong> {{ $employee->email }}</p>

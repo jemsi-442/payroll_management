@@ -28,7 +28,7 @@
 </head>
 <body>
     <div class="header">
-        <div class="company-name">{{ $settings->company_name ?? 'Summit Financial Adversory' }}</div>
+        <div class="company-name">{{ $settings->company_name ?? config('app.name') }}</div>
         <div class="document-title">EMPLOYEE PAYSLIP</div>
         <div class="period">{{ $period_display }}</div>
     </div>

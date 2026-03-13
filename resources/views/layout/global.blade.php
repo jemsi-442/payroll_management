@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Jayfour Digital Solution - @yield('title')</title>
+    <title>{{ config('app.name') }} - @yield('title')</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
@@ -24,24 +24,33 @@
 
     <style>
         * { font-family: 'Poppins', sans-serif; }
-        .sidebar { background: linear-gradient(135deg, #1a365d 0%, #153e75 100%); transition: width 0.3s ease-in-out; width: 256px; }
+
+        :root {
+            --brand-navy: #0B1F3A;
+            --brand-navy-2: #132b50;
+            --brand-royal: #1E3A8A;
+            --brand-royal-2: #162f6b;
+            --brand-accent: #22D3EE;
+        }
+
+        .sidebar { background: linear-gradient(135deg, var(--brand-navy) 0%, var(--brand-navy-2) 100%); transition: width 0.3s ease-in-out; width: 256px; }
         .sidebar.collapsed { width: 64px; }
         .sidebar.collapsed .sidebar-text { display: none; }
         .sidebar.collapsed .sidebar-link { justify-content: center; padding: 0.75rem 0; }
         .sidebar-text { visibility: visible; opacity: 1; transition: visibility 0s linear 0.2s, opacity 0.2s ease-in-out 0.2s; animation: fadeIn 0.2s ease-in-out; }
         .sidebar-link { transition: all 0.2s; padding: 0.75rem 1rem; border-radius: 0.375rem; display: flex; align-items: center; }
         .sidebar-link:hover { background-color: rgba(255, 255, 255, 0.1); }
-        .sidebar-link.active { background: linear-gradient(135deg, #10a37f 0%, #1a7f64 100%); }
+        .sidebar-link.active { background: linear-gradient(135deg, var(--brand-royal) 0%, var(--brand-royal-2) 100%); }
         .sidebar.collapsed .sidebar-link.active { border-radius: 0.375rem; width: 48px; margin: 0 auto; }
         .card { transition: all 0.3s ease; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); background: white; border-radius: 0.75rem; padding: 1.5rem; }
         .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); }
-        .btn-primary { background: linear-gradient(135deg, #10a37f 0%, #1a7f64 100%); color: white; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); }
+        .btn-primary { background: linear-gradient(135deg, var(--brand-royal) 0%, var(--brand-royal-2) 100%); color: white; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-weight: 600; transition: all 0.2s; box-shadow: 0 2px 4px rgba(30, 58, 138, 0.2); }
         .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15); }
         .status-badge { display: inline-flex; align-items: center; padding: 0.4em 0.8em; border-radius: 9999px; font-size: 0.75rem; font-weight: 600; line-height: 1; }
         .status-pending { background-color: #fffbeb; color: #f59e0b; }
         .status-paid { background-color: #d1fae5; color: #10b981; }
         .status-processing { background-color: #dbeafe; color: #3b82f6; }
-        .payroll-badge { background: linear-gradient(135deg, #10a37f 0%, #1a7f64 100%); color: white; }
+        .payroll-badge { background: linear-gradient(135deg, var(--brand-royal) 0%, var(--brand-royal-2) 100%); color: white; }
         .stat-card-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; }
         .nav-item { transition: all 0.2s; }
         .nav-item:hover { background-color: #f3f4f6; border-radius: 0.5rem; }
@@ -61,7 +70,7 @@
         .notification.error { border-left-color: #ef4444; }
         .notification.warning { border-left-color: #f59e0b; }
         .notification.info { border-left-color: #3b82f6; }
-        .notification-header { padding: 12px 16px; background: linear-gradient(135deg, #1a365d 0%, #153e75 100%); color: white; display: flex; align-items: center; justify-content: space-between; }
+        .notification-header { padding: 12px 16px; background: linear-gradient(135deg, var(--brand-navy) 0%, var(--brand-navy-2) 100%); color: white; display: flex; align-items: center; justify-content: space-between; }
         .notification-sender { font-weight: 600; font-size: 14px; display: flex; align-items: center; }
         .notification-sender i { margin-right: 8px; }
         .notification-time { font-size: 11px; opacity: 0.8; }
@@ -111,8 +120,8 @@
         }
         input[type="date"]:focus, input[type="month"]:focus, input[type="number"]:focus {
             outline: none;
-            border-color: #10b981;
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
+            border-color: var(--brand-royal);
+            box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.25);
         }
         input[type="date"]::-webkit-calendar-picker-indicator,
         input[type="month"]::-webkit-calendar-picker-indicator {
@@ -140,21 +149,71 @@
             background-color: #f9fafb;
             cursor: pointer;
         }
+
+        /* Brand theme: remap Tailwind "green" accents to JAYFOUR brand */
+        .text-green-500 { color: var(--brand-royal) !important; }
+        .text-green-600 { color: var(--brand-royal) !important; }
+        .text-green-700 { color: var(--brand-royal-2) !important; }
+        .text-green-800 { color: var(--brand-navy) !important; }
+        .text-green-100 { color: #ecfeff !important; }
+
+        .bg-green-50 { background-color: #ecfeff !important; }
+        .bg-green-100 { background-color: #cffafe !important; }
+        .bg-green-200 { background-color: #a5f3fc !important; }
+        .bg-green-500 { background-color: var(--brand-accent) !important; }
+        .bg-green-600 { background-color: var(--brand-royal) !important; }
+        .bg-green-700 { background-color: var(--brand-royal-2) !important; }
+
+        .border-green-200 { border-color: #a5f3fc !important; }
+        .border-green-400 { border-color: var(--brand-accent) !important; }
+        .border-green-500 { border-color: var(--brand-royal) !important; }
+        .border-green-600 { border-color: var(--brand-royal) !important; }
+
+        .hover\\:bg-green-50:hover { background-color: #ecfeff !important; }
+        .hover\\:bg-green-100:hover { background-color: #cffafe !important; }
+        .hover\\:bg-green-200:hover { background-color: #a5f3fc !important; }
+        .hover\\:bg-green-700:hover { background-color: var(--brand-royal-2) !important; }
+        .hover\\:text-green-700:hover { color: var(--brand-royal-2) !important; }
+        .hover\\:text-green-800:hover { color: var(--brand-navy) !important; }
+
+        .focus\\:ring-green-300:focus { --tw-ring-color: rgba(34, 211, 238, 0.35) !important; }
+        .focus\\:ring-green-500:focus { --tw-ring-color: rgba(34, 211, 238, 0.45) !important; }
+        .focus\\:border-green-500:focus { border-color: var(--brand-royal) !important; }
+        .focus\\:border-green-600:focus { border-color: var(--brand-royal) !important; }
+
+        .from-green-50 {
+            --tw-gradient-from: #ecfeff !important;
+            --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(236, 254, 255, 0)) !important;
+        }
+        .to-green-100 { --tw-gradient-to: #cffafe !important; }
+        .from-green-500 {
+            --tw-gradient-from: var(--brand-royal) !important;
+            --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(30, 58, 138, 0)) !important;
+        }
+        .to-green-600 { --tw-gradient-to: var(--brand-royal-2) !important; }
+        .from-green-600 {
+            --tw-gradient-from: var(--brand-royal) !important;
+            --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(30, 58, 138, 0)) !important;
+        }
+        .to-green-700 { --tw-gradient-to: var(--brand-royal-2) !important; }
+
+        .border-t-green-600 { border-top-color: var(--brand-royal) !important; }
     </style>
 </head>
 <body class="bg-gray-50">
-    <div class="flex h-screen">
-        <div class="sidebar text-white p-6 flex flex-col fixed h-full" id="sidebar">
+    <div class="flex min-h-screen">
+        <div id="sidebar-overlay" class="fixed inset-0 bg-black bg-opacity-40 hidden" style="z-index: 40;"></div>
+        <div class="sidebar text-white p-6 flex flex-col fixed h-full overflow-y-auto" id="sidebar">
             <div class="flex items-center mb-10 justify-center">
                 <div class="logo-container">
-                    <img src="{{ asset('assets/banner.jpg') }}" alt="Summit Financial Advesory Logo" class="h-10 w-auto">
+                    <img src="{{ asset('assets/banner.jpg') }}" alt="{{ config('app.name') }} Logo" class="h-10 w-auto">
                 </div>
             </div>
             <nav class="flex-1">
                 <ul class="space-y-2">
                     @php $userRole = Auth::user(); @endphp
 
-                    @if($userRole && in_array(strtolower($userRole->role), ['admin', 'hr manager']))
+                    @if($userRole && in_array(strtolower($userRole->role), ['admin', 'hr', 'hr manager'], true))
                         {{-- Admin / HR Links --}}
                         <li><a href="{{ route('dashboard') }}" class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}"><i class="fas fa-tachometer-alt mr-3"></i><span class="sidebar-text">Dashboard</span></a></li>
                         <li><a href="{{ route('employees.index') }}" class="sidebar-link {{ request()->routeIs('employees*') ? 'active' : '' }}"><i class="fas fa-users mr-3"></i><span class="sidebar-text">Employees</span></a></li>
@@ -174,9 +233,9 @@
         </div>
 
         <main class="ml-64 flex-1 overflow-y-auto main-content" id="main-content">
-            <header class="header flex justify-between items-center">
-                <div class="flex items-center">
-                    <button id="toggleSidebar" aria-label="Toggle Sidebar" class="text-gray-600 hover:text-gray-800 mr-4 focus:outline-none">
+            <header class="header flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                <div class="flex items-start sm:items-center">
+                    <button id="toggleSidebar" aria-label="Toggle Sidebar" class="text-gray-600 hover:text-gray-800 mr-4 focus:outline-none mt-1 sm:mt-0">
                         <i class="fas fa-bars text-xl"></i>
                     </button>
                     <div>
@@ -184,16 +243,16 @@
                         <p class="text-sm text-gray-600">@yield('header-subtitle')</p>
                     </div>
                 </div>
-                <div class="flex items-center space-x-4">
+                <div class="flex flex-wrap items-center gap-3">
                     <div class="relative">
                         <button id="notificationToggle" class="fas fa-bell text-gray-500 text-xl focus:outline-none"></button>
                         <span id="notificationDot" class="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full hidden"></span>
                     </div>
-                    <div class="text-sm text-gray-600">
+                    <div class="text-sm text-gray-600 hidden md:block">
                         {{ \Carbon\Carbon::now()->format('l, F d, Y') }}
                     </div>
                     <div class="flex items-center">
-                        <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center mr-2">
+                        <div class="w-8 h-8 rounded-full bg-cyan-500 flex items-center justify-center mr-2">
                             <i class="fas fa-user text-white"></i>
                         </div>
                         <div>
@@ -204,7 +263,7 @@
                     @if($userRole)
                         <a href="#"
                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();"
-                           class="text-gray-600 hover:text-green-600 p-2 rounded-full hover:bg-gray-100 transition">
+                           class="text-gray-600 hover:text-cyan-600 p-2 rounded-full hover:bg-gray-100 transition">
                             <i class="fas fa-sign-out-alt"></i>
                         </a>
                         <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
@@ -212,7 +271,7 @@
                         </form>
                     @else
                         <a href="{{ route('login') }}"
-                           class="text-gray-600 hover:text-green-600 p-2 rounded-full hover:bg-gray-100 transition">
+                           class="text-gray-600 hover:text-cyan-600 p-2 rounded-full hover:bg-gray-100 transition">
                             <i class="fas fa-sign-in-alt"></i>
                         </a>
                     @endif
@@ -221,7 +280,7 @@
 
             <div class="notification-container" id="notificationContainer"></div>
 
-            <div class="p-8">
+            <div class="p-4 sm:p-6 lg:p-8">
                 @yield('content')
             </div>
         </main>
@@ -235,9 +294,30 @@
             const mainContent = document.getElementById('main-content');
             const toggleButton = document.getElementById('toggleSidebar');
             const toggleIcon = toggleButton.querySelector('i');
+            const sidebarOverlay = document.getElementById('sidebar-overlay');
             const notificationToggle = document.getElementById('notificationToggle');
             const notificationDot = document.getElementById('notificationDot');
             const notificationContainer = document.getElementById('notificationContainer');
+
+            function isMobile() {
+                return window.innerWidth <= 768;
+            }
+
+            function updateSidebarOverlay() {
+                if (!sidebarOverlay) return;
+                const shouldShow = isMobile() && sidebar.classList.contains('active') && !sidebar.classList.contains('collapsed');
+                sidebarOverlay.classList.toggle('hidden', !shouldShow);
+            }
+
+            function closeMobileSidebar() {
+                if (!isMobile()) return;
+                sidebar.classList.add('collapsed');
+                sidebar.classList.remove('active');
+                mainContent.classList.add('collapsed');
+                toggleIcon.classList.remove('fa-times');
+                toggleIcon.classList.add('fa-bars');
+                updateSidebarOverlay();
+            }
 
             // Sidebar toggle
             toggleButton.addEventListener('click', function() {
@@ -255,6 +335,8 @@
                         sidebar.classList.add('active');
                     }
                 }
+
+                updateSidebarOverlay();
             });
 
             if (window.innerWidth <= 768) {
@@ -262,6 +344,43 @@
                 sidebar.classList.remove('active');
                 mainContent.classList.add('collapsed');
             }
+
+            updateSidebarOverlay();
+
+            if (sidebarOverlay) {
+                sidebarOverlay.addEventListener('click', closeMobileSidebar);
+            }
+
+            // Close on ESC (mobile)
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    closeMobileSidebar();
+                }
+            });
+
+            // Close sidebar after clicking a nav link (mobile)
+            sidebar.addEventListener('click', function(e) {
+                const link = e.target.closest('a');
+                if (link && isMobile()) {
+                    closeMobileSidebar();
+                }
+            });
+
+            // Keep state sane on resize
+            window.addEventListener('resize', function() {
+                if (!isMobile()) {
+                    if (sidebarOverlay) sidebarOverlay.classList.add('hidden');
+                    sidebar.classList.remove('active');
+                } else {
+                    // When entering mobile, ensure sidebar starts hidden
+                    sidebar.classList.add('collapsed');
+                    sidebar.classList.remove('active');
+                    mainContent.classList.add('collapsed');
+                    toggleIcon.classList.remove('fa-times');
+                    toggleIcon.classList.add('fa-bars');
+                    updateSidebarOverlay();
+                }
+            });
 
             // Notification system
             let notifications = [];
@@ -280,7 +399,7 @@
                     <div class="notification-header">
                         <div class="notification-sender">
                             <i class="fas ${getNotificationIcon(type)}"></i>
-                            Summit Financial Advesory
+                            {{ config('app.name') }}
                         </div>
                         <div class="notification-time">${timeString}</div>
                     </div>

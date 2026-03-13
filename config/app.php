@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Payroll | Management System'),
+    'name' => env('APP_NAME', 'JAYFOUR DIGITAL SOLUTIONS'),
 
     /*
     |--------------------------------------------------------------------------

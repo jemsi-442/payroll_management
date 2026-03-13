@@ -1,5 +1,5 @@
 @php
-    $settings = $settings ?? ['company_name' => 'Default Company', 'currency' => 'TZS'];
+    $settings = $settings ?? ['company_name' => config('app.name'), 'currency' => 'TZS'];
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -17,7 +17,7 @@
         .details p { margin: 5px 0; }
         .table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
         .table th, .table td { border: 1px solid #e5e7eb; padding: 8px; text-align: left; }
-        .table th { background: linear-gradient(135deg, #10a37f 0%, #1a7f64 100%); color: white; }
+        .table th { background: linear-gradient(135deg, #1E3A8A 0%, #162f6b 100%); color: white; }
     </style>
 </head>
 <body>

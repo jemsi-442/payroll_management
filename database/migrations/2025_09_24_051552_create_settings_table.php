@@ -37,6 +37,16 @@ class CreateSettingsTable extends Migration
     private function insertDefaultSettings()
     {
         $defaultSettings = [
+            // General Settings
+            [
+                'key' => 'company_name',
+                'value' => 'JAYFOUR DIGITAL SOLUTIONS',
+                'type' => 'string',
+                'category' => 'general',
+                'description' => 'Company display name',
+                'is_public' => true,
+            ],
+
             // Payroll Settings
             [
                 'key' => 'pay_schedule',

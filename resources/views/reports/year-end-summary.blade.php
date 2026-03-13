@@ -79,7 +79,7 @@
 </head>
 <body>
     <div class="header">
-        <div class="company-name">{{ $settings->company_name ?? 'Summit Financial Advisory' }}</div>
+        <div class="company-name">{{ $settings->company_name ?? config('app.name') }}</div>
         <div class="report-title">RIPOTI YA MWISHO WA MWAKA</div>
         <div class="period">{{ $period_display }}</div>
         <div>Imetengenezwa: {{ $generated_at->format('M d, Y H:i') }}</div>

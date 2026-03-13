@@ -54,7 +54,7 @@
 
     <!-- Tabs Navigation -->
     <div class="mb-6">
-        <div class="flex space-x-4 border-b border-gray-200" role="tablist">
+        <div class="flex flex-wrap gap-2 border-b border-gray-200" role="tablist">
             <button id="allEmployeesTab" class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-t-md focus:outline-none focus:ring-2 focus:ring-green-300 transition-all duration-200" role="tab" aria-selected="true" aria-controls="employeesTableContainer">
                 All Employees
             </button>
@@ -105,13 +105,13 @@
                 <table class="w-full">
                     <thead>
                         <tr class="bg-gradient-to-r from-green-50 to-green-100 text-gray-700 text-sm">
-                            <th class="py-3.5 px-6 text-left font-semibold">Name</th>
-                            <th class="py-3.5 px-6 text-left font-semibold">Employee ID</th>
-                            <th class="py-3.5 px-6 text-left font-semibold">Position</th>
-                            <th class="py-3.5 px-6 text-left font-semibold">Department</th>
-                            <th class="py-3.5 px-6 text-left font-semibold">Base Salary</th>
-                            <th class="py-3.5 px-6 text-left font-semibold">Status</th>
-                            <th class="py-3.5 px-6 text-left font-semibold">Actions</th>
+                            <th class="py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold">Name</th>
+                            <th class="py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold whitespace-nowrap">Employee ID</th>
+                            <th class="hidden md:table-cell py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold">Position</th>
+                            <th class="hidden md:table-cell py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold">Department</th>
+                            <th class="hidden lg:table-cell py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold">Base Salary</th>
+                            <th class="py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold">Status</th>
+                            <th class="py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold">Actions</th>
                         </tr>
                     </thead>
                     <tbody id="employeesTableBody" class="divide-y divide-gray-100">
@@ -131,26 +131,26 @@
                                 data-department="{{ strtolower($employee->department) }}"
                                 data-status="{{ strtolower($employee->status) }}"
                                 data-position="{{ strtolower($employee->position) }}">
-                                <td class="py-4 px-6">
+                                <td class="py-3 px-3 sm:py-4 sm:px-6">
                                     <div class="flex items-center">
-                                        <div class="flex-shrink-0 h-10 w-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                        <div class="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10 bg-green-100 rounded-full flex items-center justify-center mr-2 sm:mr-3">
                                             <span class="font-medium text-green-800">{{ substr($employee->name, 0, 1) }}</span>
                                         </div>
                                         <div>
                                             <div class="font-medium text-gray-900">{{ $employee->name }}</div>
-                                            <div class="text-sm text-gray-500">{{ $employee->email }}</div>
+                                            <div class="hidden sm:block text-sm text-gray-500">{{ $employee->email }}</div>
                                         </div>
                                     </div>
                                 </td>
-                                <td class="py-4 px-6 text-sm text-gray-900 font-mono">{{ $employee->employee_id }}</td>
-                                <td class="py-4 px-6 text-sm text-gray-700">{{ $employee->position ?? 'N/A' }}</td>
-                                <td class="py-4 px-6">
+                                <td class="py-3 px-3 sm:py-4 sm:px-6 text-sm text-gray-900 font-mono whitespace-nowrap">{{ $employee->employee_id }}</td>
+                                <td class="hidden md:table-cell py-3 px-3 sm:py-4 sm:px-6 text-sm text-gray-700">{{ $employee->position ?? 'N/A' }}</td>
+                                <td class="hidden md:table-cell py-3 px-3 sm:py-4 sm:px-6">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                         {{ $employee->department ?? 'N/A' }}
                                     </span>
                                 </td>
-                                <td class="py-4 px-6 text-sm font-medium text-gray-900">TZS {{ number_format($employee->base_salary, 0) }}</td>
-                                <td class="py-4 px-6">
+                                <td class="hidden lg:table-cell py-3 px-3 sm:py-4 sm:px-6 text-sm font-medium text-gray-900 whitespace-nowrap">TZS {{ number_format($employee->base_salary, 0) }}</td>
+                                <td class="py-3 px-3 sm:py-4 sm:px-6">
                                     @if($employee->status == 'active')
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                             <span class="w-2 h-2 bg-green-500 rounded-full mr-1.5"></span> Active
@@ -161,8 +161,8 @@
                                         </span>
                                     @endif
                                 </td>
-                                <td class="py-4 px-6">
-                                    <div class="flex items-center space-x-2">
+                                <td class="py-3 px-3 sm:py-4 sm:px-6">
+                                    <div class="flex flex-wrap items-center gap-2">
                                         <button onclick="viewEmployeeDetails('{{ $employee->employee_id }}')" class="text-blue-600 hover:text-blue-800 p-1.5 rounded-md hover:bg-blue-50 transition-all duration-200" title="View Details">
                                             <i class="fas fa-eye text-sm"></i>
                                         </button>

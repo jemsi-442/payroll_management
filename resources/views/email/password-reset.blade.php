@@ -24,7 +24,7 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .header { 
-            background: linear-gradient(135deg, #10a37f 0%, #1a7f64 100%); 
+            background: linear-gradient(135deg, #0B1F3A 0%, #132b50 100%); 
             color: white; 
             padding: 30px 20px; 
             text-align: center; 
@@ -39,7 +39,7 @@
             background: white;
         }
         .button { 
-            background: linear-gradient(135deg, #10a37f 0%, #1a7f64 100%); 
+            background: linear-gradient(135deg, #1E3A8A 0%, #162f6b 100%); 
             color: white; 
             padding: 14px 32px; 
             text-decoration: none; 

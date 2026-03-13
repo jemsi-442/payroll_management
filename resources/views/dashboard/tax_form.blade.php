@@ -1,5 +1,5 @@
 @php
-    $settings = $settings ?? ['company_name' => 'Default Company', 'currency' => 'TZS'];
+    $settings = $settings ?? ['company_name' => config('app.name'), 'currency' => 'TZS'];
 @endphp
 <!DOCTYPE html>
 <html lang="en">

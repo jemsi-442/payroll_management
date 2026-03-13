@@ -12,11 +12,16 @@
 @endsection
 
 @section('header-subtitle')
-    <span class="text-gray-600">Process and review payroll records for Summit.</span>
+    <span class="text-gray-600">Process and review payroll records for your organization.</span>
 @endsection
 
 @section('content')
-    @if(!in_array(strtolower(Auth::user()->role), ['admin', 'hr']))
+    @php
+        $userRole = strtolower(trim((string) (Auth::user()->role ?? '')));
+        $isAdminOrHR = in_array($userRole, ['admin', 'hr', 'hr manager'], true);
+    @endphp
+
+    @if(!$isAdminOrHR)
         <div class="bg-red-50 border-l-4 border-red-400 text-red-700 p-4 rounded-lg mb-6 shadow-sm" role="alert">
             <span class="block sm:inline">Unauthorized access. This page is restricted to Admin and HR roles only.</span>
         </div>
@@ -141,7 +146,7 @@
 
         <!-- Tabs Navigation -->
         <div class="mb-6">
-            <div class="flex space-x-4 border-b border-gray-200" role="tablist">
+            <div class="flex flex-wrap gap-2 border-b border-gray-200" role="tablist">
                 <button id="payrollTab" class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-t-md focus:outline-none focus:ring-2 focus:ring-green-300 transition-all duration-200" role="tab" aria-selected="true" aria-controls="payrollContainer">
                     Payroll Records
                 </button>
@@ -179,17 +184,17 @@
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead>
-                            <tr class="bg-gradient-to-r from-green-50 to-green-100 text-gray-700 text-sm">
-                                <th class="py-3.5 px-6 text-left font-semibold">Payroll ID</th>
-                                <th class="py-3.5 px-6 text-left font-semibold">Employee Details</th>
-                                <th class="py-3.5 px-6 text-left font-semibold">Period</th>
-                                <th class="py-3.5 px-6 text-left font-semibold">Base Salary (TZS)</th>
-                                <th class="py-3.5 px-6 text-left font-semibold">Allowances (TZS)</th>
-                                <th class="py-3.5 px-6 text-left font-semibold">Deductions (TZS)</th>
-                                <th class="py-3.5 px-6 text-left font-semibold">Net Salary (TZS)</th>
-                                <th class="py-3.5 px-6 text-left font-semibold">Status</th>
-                                <th class="py-3.5 px-6 text-left font-semibold">Actions</th>
-                            </tr>
+	                            <tr class="bg-gradient-to-r from-green-50 to-green-100 text-gray-700 text-sm">
+	                                <th class="py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold whitespace-nowrap">Payroll ID</th>
+	                                <th class="py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold">Employee</th>
+	                                <th class="hidden sm:table-cell py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold">Period</th>
+	                                <th class="hidden md:table-cell py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold whitespace-nowrap">Base (TZS)</th>
+	                                <th class="hidden md:table-cell py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold whitespace-nowrap">Allow. (TZS)</th>
+	                                <th class="hidden md:table-cell py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold whitespace-nowrap">Deduct. (TZS)</th>
+	                                <th class="py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold whitespace-nowrap">Net (TZS)</th>
+	                                <th class="py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold">Status</th>
+	                                <th class="py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold">Actions</th>
+	                            </tr>
                         </thead>
                         <tbody id="payrollTable" class="divide-y divide-gray-100">
                             @foreach($payrolls as $payroll)
@@ -203,40 +208,40 @@
                                     $statusColor = $statusColors[strtolower($payroll->status)] ?? 'bg-gray-100 text-gray-800';
                                 @endphp
                                 <tr class="bg-white hover:bg-gray-50 transition-all duration-200 payroll-row group" data-id="{{ strtolower($payroll->payroll_id ?? '') }}" data-employee="{{ strtolower($payroll->employee_name ?? '') }}" data-period="{{ strtolower($payroll->period ?? '') }}">
-                                    <td class="py-4 px-6 text-sm text-gray-900 font-mono">{{ $payroll->payroll_id ?? 'N/A' }}</td>
-                                    <td class="py-4 px-6">
-                                        <div class="flex items-center">
-                                            <div class="flex-shrink-0 h-10 w-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                                                <span class="font-medium text-green-800">{{ substr($payroll->employee_name, 0, 1) }}</span>
-                                            </div>
-                                            <div>
-                                                <div class="font-medium text-gray-900">{{ $payroll->employee_name }}</div>
-                                                <div class="text-sm text-gray-500"> {{ $payroll->employee_id ?? 'N/A' }}</div>
-                                                <div class="text-xs text-gray-400">{{ $payroll->position ?? 'N/A' }}</div>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td class="py-4 px-6 text-sm text-gray-900">{{ $payroll->period ? \Carbon\Carbon::createFromFormat('Y-m', $payroll->period)->format('F Y') : 'N/A' }}</td>
-                                    <td class="py-4 px-6 text-sm text-gray-900 font-semibold">TZS {{ number_format($payroll->base_salary, 0) }}</td>
-                                    <td class="py-4 px-6 text-sm text-green-600 font-semibold">+{{ number_format($payroll->allowances, 0) }}</td>
-                                    <td class="py-4 px-6 text-sm text-red-600 font-semibold">-{{ number_format($payroll->deductions, 0) }}</td>
-                                    <td class="py-4 px-6 text-sm text-gray-900 font-bold">TZS {{ number_format($payroll->net_salary, 0) }}</td>
-                                    <td class="py-4 px-6">
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColor }}">
-                                            <i class="fas fa-circle mr-1" style="font-size: 6px;"></i>
-                                            {{ $payroll->status }}
-                                        </span>
-                                    </td>
-                                    <td class="py-4 px-6">
-                                        <div class="flex items-center space-x-2">
-                                            <button onclick="viewPayrollDetails('{{ $payroll->payroll_id }}')" class="text-green-600 hover:text-green-800 p-1.5 rounded-md hover:bg-green-50 transition-all duration-200" title="View Details">
-                                                <i class="fas fa-eye text-sm"></i>
-                                            </button>
-                                            <button onclick="revertPayroll('{{ $payroll->payroll_id }}')" class="text-red-600 hover:text-red-800 p-1.5 rounded-md hover:bg-red-50 transition-all duration-200" title="Revert Payroll">
-                                                <i class="fas fa-undo text-sm"></i>
-                                            </button>
-                                        </div>
-                                    </td>
+	                                    <td class="py-3 px-3 sm:py-4 sm:px-6 text-sm text-gray-900 font-mono whitespace-nowrap">{{ $payroll->payroll_id ?? 'N/A' }}</td>
+	                                    <td class="py-3 px-3 sm:py-4 sm:px-6">
+	                                        <div class="flex items-center">
+	                                            <div class="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10 bg-green-100 rounded-full flex items-center justify-center mr-2 sm:mr-3">
+	                                                <span class="font-medium text-green-800">{{ substr($payroll->employee_name, 0, 1) }}</span>
+	                                            </div>
+	                                            <div>
+	                                                <div class="font-medium text-gray-900">{{ $payroll->employee_name }}</div>
+	                                                <div class="hidden sm:block text-sm text-gray-500"> {{ $payroll->employee_id ?? 'N/A' }}</div>
+	                                                <div class="hidden md:block text-xs text-gray-400">{{ $payroll->position ?? 'N/A' }}</div>
+	                                            </div>
+	                                        </div>
+	                                    </td>
+	                                    <td class="hidden sm:table-cell py-3 px-3 sm:py-4 sm:px-6 text-sm text-gray-900 whitespace-nowrap">{{ $payroll->period ? \Carbon\Carbon::createFromFormat('Y-m', $payroll->period)->format('F Y') : 'N/A' }}</td>
+	                                    <td class="hidden md:table-cell py-3 px-3 sm:py-4 sm:px-6 text-sm text-gray-900 font-semibold whitespace-nowrap">TZS {{ number_format($payroll->base_salary, 0) }}</td>
+	                                    <td class="hidden md:table-cell py-3 px-3 sm:py-4 sm:px-6 text-sm text-green-600 font-semibold whitespace-nowrap">+{{ number_format($payroll->allowances, 0) }}</td>
+	                                    <td class="hidden md:table-cell py-3 px-3 sm:py-4 sm:px-6 text-sm text-red-600 font-semibold whitespace-nowrap">-{{ number_format($payroll->deductions, 0) }}</td>
+	                                    <td class="py-3 px-3 sm:py-4 sm:px-6 text-sm text-gray-900 font-bold whitespace-nowrap">TZS {{ number_format($payroll->net_salary, 0) }}</td>
+	                                    <td class="py-3 px-3 sm:py-4 sm:px-6">
+	                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColor }}">
+	                                            <i class="fas fa-circle mr-1" style="font-size: 6px;"></i>
+	                                            {{ $payroll->status }}
+	                                        </span>
+	                                    </td>
+	                                    <td class="py-3 px-3 sm:py-4 sm:px-6">
+	                                        <div class="flex flex-wrap items-center gap-2">
+	                                            <button onclick="viewPayrollDetails('{{ $payroll->payroll_id }}')" class="text-green-600 hover:text-green-800 p-1.5 rounded-md hover:bg-green-50 transition-all duration-200" title="View Details">
+	                                                <i class="fas fa-eye text-sm"></i>
+	                                            </button>
+	                                            <button onclick="revertPayroll('{{ $payroll->payroll_id }}')" class="text-red-600 hover:text-red-800 p-1.5 rounded-md hover:bg-red-50 transition-all duration-200" title="Revert Payroll">
+	                                                <i class="fas fa-undo text-sm"></i>
+	                                            </button>
+	                                        </div>
+	                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -350,14 +355,14 @@
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead>
-                            <tr class="bg-gray-50 text-gray-700 text-sm">
-                                <th class="py-3.5 px-6 text-left font-semibold">Transaction ID</th>
-                                <th class="py-3.5 px-6 text-left font-semibold">Employee Details</th>
-                                <th class="py-3.5 px-6 text-left font-semibold">Amount (TZS)</th>
-                                <th class="py-3.5 px-6 text-left font-semibold">Date</th>
-                                <th class="py-3.5 px-6 text-left font-semibold">Type</th>
-                                <th class="py-3.5 px-6 text-left font-semibold">Status</th>
-                                <th class="py-3.5 px-6 text-left font-semibold">Actions</th>
+                            <tr class="bg-gradient-to-r from-green-50 to-green-100 text-gray-700 text-sm">
+                                <th class="py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold whitespace-nowrap">Transaction ID</th>
+                                <th class="py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold">Employee</th>
+                                <th class="py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold whitespace-nowrap">Amount (TZS)</th>
+                                <th class="hidden md:table-cell py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold whitespace-nowrap">Date</th>
+                                <th class="hidden sm:table-cell py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold">Type</th>
+                                <th class="py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold">Status</th>
+                                <th class="py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="transactionTable" class="divide-y divide-gray-100">
@@ -379,34 +384,35 @@
                                     $typeColor = $typeColors[strtolower($transaction->type)] ?? 'text-gray-600 bg-gray-50';
                                 @endphp
                                 <tr class="bg-white hover:bg-gray-50 transition-all duration-200 transaction-row group" data-id="{{ strtolower($transaction->transaction_id ?? '') }}" data-employee="{{ strtolower($transaction->employee_name ?? '') }}" data-period="{{ strtolower($transaction->transaction_date ? \Carbon\Carbon::parse($transaction->transaction_date)->format('Y-m') : '') }}">
-                                    <td class="py-4 px-6 text-sm text-gray-900 font-mono">{{ $transaction->transaction_id ?? 'N/A' }}</td>
-                                    <td class="py-4 px-6">
+                                    <td class="py-3 px-3 sm:py-4 sm:px-6 text-sm text-gray-900 font-mono whitespace-nowrap">{{ $transaction->transaction_id ?? 'N/A' }}</td>
+                                    <td class="py-3 px-3 sm:py-4 sm:px-6">
                                         <div class="flex items-center">
-                                            <div class="flex-shrink-0 h-10 w-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                            <div class="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10 bg-green-100 rounded-full flex items-center justify-center mr-2 sm:mr-3">
                                                 <span class="font-medium text-green-800">{{ substr($transaction->employee_name, 0, 1) }}</span>
                                             </div>
                                             <div>
                                                 <div class="font-medium text-gray-900">{{ $transaction->employee_name }}</div>
-                                                <div class="text-sm text-gray-500">{{ $transaction->department ?? 'N/A' }} | {{ $transaction->employee_id ?? 'N/A' }}</div>
-                                                <div class="text-xs text-gray-400">{{ $transaction->position ?? 'N/A' }}</div>
+                                                <div class="text-xs text-gray-500 sm:hidden">{{ $transaction->employee_id ?? 'N/A' }}</div>
+                                                <div class="hidden sm:block text-sm text-gray-500">{{ $transaction->department ?? 'N/A' }} | {{ $transaction->employee_id ?? 'N/A' }}</div>
+                                                <div class="hidden md:block text-xs text-gray-400">{{ $transaction->position ?? 'N/A' }}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="py-4 px-6 text-sm text-gray-900 font-bold">TZS {{ number_format($transaction->amount, 0) }}</td>
-                                    <td class="py-4 px-6 text-sm text-gray-500">{{ \Carbon\Carbon::parse($transaction->transaction_date)->format('M d, Y') }}</td>
-                                    <td class="py-4 px-6">
+                                    <td class="py-3 px-3 sm:py-4 sm:px-6 text-sm text-gray-900 font-bold whitespace-nowrap">TZS {{ number_format($transaction->amount, 0) }}</td>
+                                    <td class="hidden md:table-cell py-3 px-3 sm:py-4 sm:px-6 text-sm text-gray-500 whitespace-nowrap">{{ \Carbon\Carbon::parse($transaction->transaction_date)->format('M d, Y') }}</td>
+                                    <td class="hidden sm:table-cell py-3 px-3 sm:py-4 sm:px-6">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $typeColor }}">
                                             {{ str_replace('_', ' ', ucfirst($transaction->type)) }}
                                         </span>
                                     </td>
-                                    <td class="py-4 px-6">
+                                    <td class="py-3 px-3 sm:py-4 sm:px-6">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColor }}">
                                             <i class="fas fa-circle mr-1" style="font-size: 6px;"></i>
                                             {{ $transaction->status }}
                                         </span>
                                     </td>
-                                    <td class="py-4 px-6">
-                                        <div class="flex items-center space-x-2">
+                                    <td class="py-3 px-3 sm:py-4 sm:px-6">
+                                        <div class="flex items-center flex-wrap gap-2">
                                             <button onclick="viewTransactionDetails('{{ $transaction->transaction_id }}')" class="text-green-600 hover:text-green-800 p-1.5 rounded-md hover:bg-green-50 transition-all duration-200" title="View Details">
                                                 <i class="fas fa-eye text-sm"></i>
                                             </button>
@@ -522,14 +528,14 @@
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead>
-                            <tr class="bg-gray-50 text-gray-700 text-sm">
-                                <th class="py-3.5 px-6 text-left font-semibold">Alert ID</th>
-                                <th class="py-3.5 px-6 text-left font-semibold">Employee Details</th>
-                                <th class="py-3.5 px-6 text-left font-semibold">Type</th>
-                                <th class="py-3.5 px-6 text-left font-semibold">Message</th>
-                                <th class="py-3.5 px-6 text-left font-semibold">Date</th>
-                                <th class="py-3.5 px-6 text-left font-semibold">Status</th>
-                                <th class="py-3.5 px-6 text-left font-semibold">Actions</th>
+                            <tr class="bg-gradient-to-r from-green-50 to-green-100 text-gray-700 text-sm">
+                                <th class="hidden sm:table-cell py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold whitespace-nowrap">Alert ID</th>
+                                <th class="py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold">Employee</th>
+                                <th class="hidden sm:table-cell py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold">Type</th>
+                                <th class="py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold">Message</th>
+                                <th class="hidden md:table-cell py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold whitespace-nowrap">Date</th>
+                                <th class="py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold">Status</th>
+                                <th class="py-3 px-3 sm:py-3.5 sm:px-6 text-left font-semibold">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="alertTable" class="divide-y divide-gray-100">
@@ -549,34 +555,35 @@
                                     $typeColor = $typeColors[strtolower(str_replace(' ', '_', $alert->type))] ?? 'text-gray-600 bg-gray-50';
                                 @endphp
                                 <tr class="bg-white hover:bg-gray-50 transition-all duration-200 alert-row group" data-id="{{ strtolower($alert->alert_id ?? '') }}" data-employee="{{ strtolower($alert->employee_name ?? '') }}" data-period="{{ strtolower($alert->created_at ? \Carbon\Carbon::parse($alert->created_at)->format('Y-m') : '') }}">
-                                    <td class="py-4 px-6 text-sm text-gray-900 font-mono">{{ $alert->alert_id ?? 'N/A' }}</td>
-                                    <td class="py-4 px-6">
+                                    <td class="hidden sm:table-cell py-3 px-3 sm:py-4 sm:px-6 text-sm text-gray-900 font-mono whitespace-nowrap">{{ $alert->alert_id ?? 'N/A' }}</td>
+                                    <td class="py-3 px-3 sm:py-4 sm:px-6">
                                         <div class="flex items-center">
-                                            <div class="flex-shrink-0 h-10 w-10 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                            <div class="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10 bg-green-100 rounded-full flex items-center justify-center mr-2 sm:mr-3">
                                                 <span class="font-medium text-green-800">{{ substr($alert->employee_name, 0, 1) }}</span>
                                             </div>
                                             <div>
                                                 <div class="font-medium text-gray-900">{{ $alert->employee_name }}</div>
-                                                <div class="text-sm text-gray-500">{{ $alert->department ?? 'N/A' }} | {{ $alert->employee_id ?? 'N/A' }}</div>
-                                                <div class="text-xs text-gray-400">{{ $alert->position ?? 'N/A' }}</div>
+                                                <div class="text-xs text-gray-500 sm:hidden">{{ $alert->employee_id ?? 'N/A' }}</div>
+                                                <div class="hidden sm:block text-sm text-gray-500">{{ $alert->department ?? 'N/A' }} | {{ $alert->employee_id ?? 'N/A' }}</div>
+                                                <div class="hidden md:block text-xs text-gray-400">{{ $alert->position ?? 'N/A' }}</div>
                                             </div>
                                         </div>
                                     </td>
-                                    <td class="py-4 px-6">
+                                    <td class="hidden sm:table-cell py-3 px-3 sm:py-4 sm:px-6">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $typeColor }}">
                                             {{ $alert->type }}
                                         </span>
                                     </td>
-                                    <td class="py-4 px-6 text-sm text-gray-500 max-w-xs truncate">{{ $alert->message }}</td>
-                                    <td class="py-4 px-6 text-sm text-gray-500">{{ \Carbon\Carbon::parse($alert->created_at)->format('M d, Y') }}</td>
-                                    <td class="py-4 px-6">
+                                    <td class="py-3 px-3 sm:py-4 sm:px-6 text-sm text-gray-500 max-w-xs sm:max-w-sm truncate">{{ $alert->message }}</td>
+                                    <td class="hidden md:table-cell py-3 px-3 sm:py-4 sm:px-6 text-sm text-gray-500 whitespace-nowrap">{{ \Carbon\Carbon::parse($alert->created_at)->format('M d, Y') }}</td>
+                                    <td class="py-3 px-3 sm:py-4 sm:px-6">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $statusColor }}">
                                             <i class="fas fa-circle mr-1" style="font-size: 6px;"></i>
                                             {{ $alert->status }}
                                         </span>
                                     </td>
-                                    <td class="py-4 px-6">
-                                        <div class="flex items-center space-x-2">
+                                    <td class="py-3 px-3 sm:py-4 sm:px-6">
+                                        <div class="flex items-center flex-wrap gap-2">
                                             <button onclick="viewAlertDetails('{{ $alert->alert_id }}')" class="text-green-600 hover:text-green-800 p-1.5 rounded-md hover:bg-green-50 transition-all duration-200" title="View Details">
                                                 <i class="fas fa-eye text-sm"></i>
                                             </button>

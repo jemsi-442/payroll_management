@@ -65,7 +65,7 @@
 </head>
 <body>
     <div class="header">
-        <div class="company-name">{{ $settings->company_name ?? 'Summit Financial Adversory' }}</div>
+        <div class="company-name">{{ $settings->company_name ?? config('app.name') }}</div>
         <div class="report-title">PAYROLL REPORT</div>
         <div class="period">{{ $period_display }}</div>
         <div>Generated on: {{ $generated_at->format('M d, Y H:i') }}</div>
