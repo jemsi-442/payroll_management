@@ -14,7 +14,22 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // Railway / reverse proxy: tumaini headers kama X-Forwarded-Proto ili app itambue HTTPS.
-        $middleware->trustProxies(at: '*', headers: Request::HEADER_X_FORWARDED_ALL);
+        $proxyHeaders = 0;
+        foreach ([
+            'HEADER_X_FORWARDED_FOR',
+            'HEADER_X_FORWARDED_HOST',
+            'HEADER_X_FORWARDED_PORT',
+            'HEADER_X_FORWARDED_PROTO',
+            // Symfony versions nyingine zina `HEADER_X_FORWARDED_PREFIX`, nyingine hazina.
+            'HEADER_X_FORWARDED_PREFIX',
+        ] as $headerConstant) {
+            $constantName = Request::class.'::'.$headerConstant;
+            if (defined($constantName)) {
+                $proxyHeaders |= constant($constantName);
+            }
+        }
+
+        $middleware->trustProxies(at: '*', headers: $proxyHeaders);
 
         // Global middleware
         $middleware->web(prepend: [
