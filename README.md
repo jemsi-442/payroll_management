@@ -89,5 +89,9 @@ A modern, responsive **HR & Payroll Dashboard** built with **Laravel Blade**, **
      - Or set `DB_CONNECTION` + `DB_HOST` + `DB_PORT` + `DB_DATABASE` + `DB_USERNAME` + `DB_PASSWORD`
    - `LOG_CHANNEL=stderr`
 
-3. **Run migrations on deploy**
-   - Run once: `php artisan migrate --force`
+3. **Run migrations / seed**
+   - If you have a shell/console: run `php artisan migrate --force` (and optionally `php artisan db:seed --force`)
+   - If you don't see a console in Railway UI, set these variables temporarily:
+     - `RUN_MIGRATIONS=true`
+     - `RUN_SEED=true` (optional; creates default accounts like `admin@payroll.com` / `password`)
+     - Redeploy once, then remove them.

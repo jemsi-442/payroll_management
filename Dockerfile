@@ -25,6 +25,10 @@ RUN composer install --optimize-autoloader --no-dev --ignore-platform-req=ext-gd
 # Give permissions
 RUN mkdir -p storage bootstrap/cache && chown -R www-data:www-data storage bootstrap/cache
 
+RUN chmod +x railway_start.sh
+
 EXPOSE 8000
 
-CMD ["sh", "-c", "php artisan serve --host=0.0.0.0 --port=${PORT:-8000}"]
+USER www-data
+
+CMD ["sh", "-c", "./railway_start.sh"]

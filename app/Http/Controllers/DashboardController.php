@@ -34,26 +34,40 @@ class DashboardController extends Controller
         $user = Auth::user();
         if (!$user) {
             \Log::warning('User not authenticated.');
-            return redirect('/login')->with('error', 'Please log in.');
+            return redirect()->route('login')->with('error', 'Please log in.');
         }
 
-        $isAdminOrHR = in_array(strtolower($user->role ?? ''), ['admin', 'hr']);
+        $isAdminOrHR = in_array(strtolower($user->role ?? ''), ['admin', 'hr', 'hr manager']);
         $isEmployee = strtolower($user->role ?? '') === 'employee';
 
         // Recent payslips (last 5) with complete employee data
-        $recentPayslips = Payslip::select(
-                'payslips.*',
-                'employees.department',
-                'employees.position',
-                'employees.email'
-            )
-            ->leftJoin('employees', 'payslips.employee_id', '=', 'employees.employee_id')
-            ->latest()
-            ->take(5)
-            ->get();
+        $recentPayslips = collect();
+        try {
+            if (Schema::hasTable('payslips') && Schema::hasTable('employees')) {
+                $recentPayslips = Payslip::select(
+                        'payslips.*',
+                        'employees.department',
+                        'employees.position',
+                        'employees.email'
+                    )
+                    ->leftJoin('employees', 'payslips.employee_id', '=', 'employees.employee_id')
+                    ->latest()
+                    ->take(5)
+                    ->get();
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to load recent payslips: ' . $e->getMessage());
+        }
 
         // Employees data with complete information
-        $employees = Employee::with('departmentRel')->get();
+        $employees = collect();
+        try {
+            if (Schema::hasTable('employees')) {
+                $employees = Employee::with('departmentRel')->get();
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to load employees: ' . $e->getMessage());
+        }
         $employeesForExport = $employees->map(function ($e) {
             return [
                 'id' => $e->employee_id ?? '',
@@ -75,14 +89,40 @@ class DashboardController extends Controller
 
         // Common settings
         $currentPeriod = now()->format('F Y');
-        $settings = Setting::pluck('value', 'key')->toArray();
+        $settings = [];
+        try {
+            if (Schema::hasTable('settings')) {
+                $settings = Setting::pluck('value', 'key')->toArray();
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to load settings: ' . $e->getMessage());
+        }
 
         // Fetch all required data for modals and dashboard
-        $departments = Department::all();
-        $banks = Bank::all();
-        $allowances = Allowance::where('active', 1)->get();
-        $deductions = Deduction::where('active', 1)->get();
-        $roles = Role::all();
+        $departments = collect();
+        $banks = collect();
+        $allowances = collect();
+        $deductions = collect();
+        $roles = collect();
+        try {
+            if (Schema::hasTable('departments')) {
+                $departments = Department::all();
+            }
+            if (Schema::hasTable('banks')) {
+                $banks = Bank::all();
+            }
+            if (Schema::hasTable('allowance')) {
+                $allowances = Allowance::where('active', 1)->get();
+            }
+            if (Schema::hasTable('deductions')) {
+                $deductions = Deduction::where('active', 1)->get();
+            }
+            if (Schema::hasTable('roles')) {
+                $roles = Role::all();
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to load lookup data: ' . $e->getMessage());
+        }
 
         // Employee dashboard (limited view)
         if ($isEmployee && !$isAdminOrHR) {
@@ -117,19 +157,53 @@ class DashboardController extends Controller
         }
 
         // Admin/HR dashboard - Complete statistics
-        $totalEmployees = Employee::count();
-        $employeeGrowth = $this->calculateGrowth(Employee::class, 'created_at');
+        $totalEmployees = 0;
+        $employeeGrowth = 0;
+        try {
+            if (Schema::hasTable('employees')) {
+                $totalEmployees = Employee::count();
+                $employeeGrowth = $this->calculateGrowth(Employee::class, 'created_at');
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to calculate employee stats: ' . $e->getMessage());
+        }
         
-        $monthlyPayroll = Payroll::whereMonth('created_at', Carbon::now()->month)
-                                 ->whereYear('created_at', Carbon::now()->year)
-                                 ->sum('net_salary');
-        $payrollGrowth = $this->calculatePayrollGrowth();
+        $monthlyPayroll = 0;
+        $payrollGrowth = 0;
+        try {
+            if (Schema::hasTable('payrolls')) {
+                $payrollNetColumn = Schema::hasColumn('payrolls', 'net_salary')
+                    ? 'net_salary'
+                    : (Schema::hasColumn('payrolls', 'total_amount') ? 'total_amount' : 'base_salary');
+
+                $monthlyPayroll = Payroll::whereMonth('created_at', Carbon::now()->month)
+                    ->whereYear('created_at', Carbon::now()->year)
+                    ->sum($payrollNetColumn);
+                $payrollGrowth = $this->calculatePayrollGrowth();
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to calculate payroll stats: ' . $e->getMessage());
+        }
         
-        $payslipsGenerated = Payslip::whereMonth('created_at', Carbon::now()->month)
-                                    ->whereYear('created_at', Carbon::now()->year)
-                                    ->count();
+        $payslipsGenerated = 0;
+        try {
+            if (Schema::hasTable('payslips')) {
+                $payslipsGenerated = Payslip::whereMonth('created_at', Carbon::now()->month)
+                    ->whereYear('created_at', Carbon::now()->year)
+                    ->count();
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to count payslips: ' . $e->getMessage());
+        }
         
-        $pendingTasks = ComplianceTask::where('status', 'pending')->count();
+        $pendingTasks = 0;
+        try {
+            if (Schema::hasTable('compliance_tasks')) {
+                $pendingTasks = ComplianceTask::where('status', 'pending')->count();
+            }
+        } catch (\Exception $e) {
+            \Log::error('Failed to count compliance tasks: ' . $e->getMessage());
+        }
 
         return view('dashboard.dashboard', compact(
             'totalEmployees', 'monthlyPayroll', 'employeeGrowth', 'payslipsGenerated',
@@ -705,6 +779,14 @@ class DashboardController extends Controller
     private function getChartData($period, $user, $isAdminOrHR)
     {
         $data = [];
+        if (!Schema::hasTable('payrolls')) {
+            return $data;
+        }
+
+        $sumColumn = Schema::hasColumn('payrolls', 'total_amount')
+            ? 'total_amount'
+            : (Schema::hasColumn('payrolls', 'net_salary') ? 'net_salary' : 'base_salary');
+
         if ($period == 6) {
             $data = collect(range(5, 0, -1))->map(function ($m) use ($user, $isAdminOrHR) {
                 $q = Payroll::whereMonth('created_at', Carbon::now()->subMonths($m)->month)
@@ -712,7 +794,11 @@ class DashboardController extends Controller
                 if (!$isAdminOrHR) {
                     $q->where('employee_id', $user->employee_id);
                 }
-                return round($q->sum('total_amount') / 1_000_000, 2);
+                $sumColumn = Schema::hasColumn('payrolls', 'total_amount')
+                    ? 'total_amount'
+                    : (Schema::hasColumn('payrolls', 'net_salary') ? 'net_salary' : 'base_salary');
+
+                return round($q->sum($sumColumn) / 1_000_000, 2);
             })->toArray();
         } elseif ($period == 12) {
             $startOfYear = Carbon::now()->startOfYear();
@@ -723,7 +809,11 @@ class DashboardController extends Controller
                 if (!$isAdminOrHR) {
                     $q->where('employee_id', $user->employee_id);
                 }
-                return round($q->sum('total_amount') / 1_000_000, 2);
+                $sumColumn = Schema::hasColumn('payrolls', 'total_amount')
+                    ? 'total_amount'
+                    : (Schema::hasColumn('payrolls', 'net_salary') ? 'net_salary' : 'base_salary');
+
+                return round($q->sum($sumColumn) / 1_000_000, 2);
             })->toArray();
         } elseif ($period == 24) {
             $startOfLastYear = Carbon::now()->subYear()->startOfYear();
@@ -734,7 +824,11 @@ class DashboardController extends Controller
                 if (!$isAdminOrHR) {
                     $q->where('employee_id', $user->employee_id);
                 }
-                return round($q->sum('total_amount') / 1_000_000, 2);
+                $sumColumn = Schema::hasColumn('payrolls', 'total_amount')
+                    ? 'total_amount'
+                    : (Schema::hasColumn('payrolls', 'net_salary') ? 'net_salary' : 'base_salary');
+
+                return round($q->sum($sumColumn) / 1_000_000, 2);
             })->toArray();
         }
         return $data;
@@ -757,13 +851,21 @@ class DashboardController extends Controller
 
     private function calculatePayrollGrowth()
     {
+        if (!Schema::hasTable('payrolls')) {
+            return 0;
+        }
+
+        $sumColumn = Schema::hasColumn('payrolls', 'net_salary')
+            ? 'net_salary'
+            : (Schema::hasColumn('payrolls', 'total_amount') ? 'total_amount' : 'base_salary');
+
         $current = Payroll::whereMonth('created_at', Carbon::now()->month)
                          ->whereYear('created_at', Carbon::now()->year)
-                         ->sum('net_salary');
+                         ->sum($sumColumn);
 
         $previous = Payroll::whereMonth('created_at', Carbon::now()->subMonth()->month)
                           ->whereYear('created_at', Carbon::now()->subMonth()->year)
-                          ->sum('net_salary');
+                          ->sum($sumColumn);
 
         return $previous == 0
             ? ($current > 0 ? 100 : 0)
