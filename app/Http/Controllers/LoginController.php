@@ -119,12 +119,9 @@ class LoginController extends Controller
             // Check if user exists and is active
             $user = Employee::where('email', $request->email)->first();
 
-            if (!$user) {
-                return back()->withErrors(['email' => 'We can\'t find a user with that email address.']);
-            }
-
-            if (!$user->isActive()) {
-                return back()->withErrors(['email' => 'Your account is not active. Please contact administrator.']);
+            // Security: usi-leak kama email ipo au la (avoid user enumeration).
+            if (!$user || !$user->isActive()) {
+                return back()->with('status', 'If your email exists in our system, you will receive a password reset link shortly.');
             }
 
             // Generate reset token
@@ -142,11 +139,12 @@ class LoginController extends Controller
             // Send reset email using Gmail
             $this->sendResetEmail($user, $token);
 
-            return back()->with('status', 'We have emailed your password reset link!');
+            return back()->with('status', 'If your email exists in our system, you will receive a password reset link shortly.');
 
         } catch (\Exception $e) {
             \Log::error('Password reset error: ' . $e->getMessage());
-            return back()->withErrors(['email' => 'Failed to send reset email. Please try again later.']);
+            // Security: still return a generic status message.
+            return back()->with('status', 'If your email exists in our system, you will receive a password reset link shortly.');
         }
     }
 

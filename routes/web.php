@@ -20,13 +20,13 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('guest')->group(function () {
     // Login Routes
     Route::get('/', [LoginController::class, 'showLoginForm'])->name('login');
-    Route::post('/', [LoginController::class, 'login']);
+    Route::post('/', [LoginController::class, 'login'])->middleware('throttle:login');
     
     // Password Reset Routes
     Route::get('/forgot-password', [LoginController::class, 'showForgotPasswordForm'])->name('password.request');
-    Route::post('/forgot-password', [LoginController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::post('/forgot-password', [LoginController::class, 'sendResetLinkEmail'])->middleware('throttle:password-reset')->name('password.email');
     Route::get('/reset-password/{token}', [LoginController::class, 'showResetForm'])->name('password.reset');
-    Route::post('/reset-password', [LoginController::class, 'reset'])->name('password.update');
+    Route::post('/reset-password', [LoginController::class, 'reset'])->middleware('throttle:password-reset')->name('password.update');
     
     // Test Email Route (MUST be commented out or removed before production deployment)
     // Route::get('/test-email', [LoginController::class, 'testEmail'])->name('test.email');

@@ -39,7 +39,9 @@ class AddHeaders
         $response->header('Referrer-Policy', 'no-referrer-when-downgrade');
 
         // 5. Strict-Transport-Security (HSTS) - Inalazimisha HTTPS (kama unatumia HTTPS)
-        // $response->header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+        if (config('app.force_https') && $request->isSecure()) {
+            $response->header('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+        }
 
         // 6. Permissions-Policy - Huweka ruhusa kwa APIs za browser
         $response->header('Permissions-Policy', 'geolocation=(), microphone=(), camera=()');

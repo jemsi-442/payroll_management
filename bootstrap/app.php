@@ -4,6 +4,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use App\Http\Middleware\PreventBrowserHistory;
 
 return Application::configure(basePath: dirname(__DIR__))
@@ -36,6 +37,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\ForceHttps::class,
         ], append: [
             \App\Http\Middleware\CheckSessionTimeout::class,
+            \App\Http\Middleware\AddHeaders::class,
             PreventBrowserHistory::class,
         ]);
 
@@ -52,5 +54,20 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        $exceptions->render(function (ThrottleRequestsException $e, Request $request) {
+            $headers = method_exists($e, 'getHeaders') ? $e->getHeaders() : [];
+            $retryAfter = (int) ($headers['Retry-After'] ?? 0);
+
+            $message = $retryAfter > 0
+                ? "Umejaribu mara nyingi. Subiri sekunde {$retryAfter} kisha jaribu tena."
+                : 'Umejaribu mara nyingi. Tafadhali subiri kisha jaribu tena.';
+
+            if ($request->expectsJson()) {
+                return response()->json(['message' => $message], 429)->withHeaders($headers);
+            }
+
+            return back()
+                ->withErrors(['email' => $message])
+                ->withInput($request->except('password'));
+        });
     })->create();

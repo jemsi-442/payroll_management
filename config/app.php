@@ -66,6 +66,10 @@ return [
 
     'force_https' => filter_var(env('FORCE_HTTPS', false), FILTER_VALIDATE_BOOLEAN),
 
+    'login_rate_limit_per_minute' => (int) env('LOGIN_RATE_LIMIT_PER_MINUTE', 5),
+
+    'password_reset_rate_limit_per_minute' => (int) env('PASSWORD_RESET_RATE_LIMIT_PER_MINUTE', 3),
+
     /*
     |--------------------------------------------------------------------------
     | Application Timezone
